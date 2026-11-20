@@ -10,6 +10,7 @@ const HELP: &str = "WavySync: sync Wave Terminal to a GitHub repo, one folder pe
 
   wavysync                 open the window
   wavysync --open          open the window detached (what the Wave widget runs)
+  wavysync --demo          the window on made-up data; touches nothing
   wavysync --daemon        the background loop that pushes changes
   wavysync --sync          push now
   wavysync --profiles      list the profiles in the repo
@@ -36,6 +37,7 @@ fn main() {
         "--help" | "-h" => println!("{HELP}"),
         "--open" => app::spawn_detached(&[]),
         "--daemon" => app::daemon(),
+        "--demo" => ui::run(true),
         "--sync" => ok_or_exit(app::sync_once(&app::Config::load(), true).map(|c| match c {
             Some(c) => println!("pushed {c}"),
             None => println!("nothing changed"),
@@ -75,6 +77,6 @@ fn main() {
             eprintln!("unknown option {first}\n\n{HELP}");
             std::process::exit(2);
         }
-        _ => ui::run(),
+        _ => ui::run(false),
     }
 }

@@ -229,6 +229,9 @@ impl S {
     }
 
     fn signed_in(&mut self, token: String) {
+        if self.demo {
+            return;
+        }
         let _ = app::set_token(Some(&token));
         self.list_repos(token);
     }
@@ -263,6 +266,10 @@ impl S {
         }
         self.cfg.setup_done = true;
         self.cfg.save();
+        if self.demo {
+            self.sync_now();
+            return;
+        }
         if let Err(e) = app::install_widget().and_then(|_| app::install_autostart()) {
             self.err = e;
         }
@@ -291,6 +298,11 @@ impl S {
         self.start_flow();
         let pick = self.pick.clone();
         let busy = self.t("Applying: confirm Wave's quit question…", "Uygulanıyor: Wave'in çıkış sorusunu onayla…");
+        if self.demo {
+            self.busy = busy;
+            self.demo_done = self.now + 3.2;
+            return;
+        }
         self.spawn(busy, move || {
             let r = app::apply_profile(&pick, &save_to);
             if r.is_ok() {
@@ -781,7 +793,9 @@ fn step_repo(s: &S, k: &Kit) -> El {
             .child(label(s.login.clone(), 13.0, 600.0, INK))
             .child(spacer())
             .child(label(s.t("Sign out", "Çıkış yap"), 11.5, 600.0, MUTED).cursor(Cursor::Pointer).on_press(|s: &mut S| {
-                let _ = app::set_token(None);
+                if !s.demo {
+                    let _ = app::set_token(None);
+                }
                 s.login.clear();
                 s.cfg.login.clear();
                 s.repos.clear();
@@ -1171,7 +1185,23 @@ fn demo(s: &mut S) {
     ] };
 }
 
-pub fn run() {
+fn init_demo() -> S {
+    let mut s = init();
+    demo(&mut s);
+    s.cfg.setup_done = true;
+    s
+}
+
+/// `demo`: the real window on made-up data. Settings go to a temporary folder, and the keychain,
+/// GitHub and Wave are left alone.
+pub fn run(demo_mode: bool) {
+    if demo_mode {
+        // SAFETY: still single threaded; nothing has read the environment yet.
+        unsafe {
+            std::env::set_var("WAVYSYNC_HOME", std::env::temp_dir().join("wavysync-demo"));
+            std::env::set_var("WAVYSYNC_TOKEN", "");
+        }
+    }
     let spec = AppSpec {
         setup: Some(setup),
         poll: Some(poll),
@@ -1186,7 +1216,7 @@ pub fn run() {
             ("flow", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.flowing = true; s.flow.speed = FLOW_V; s.flow.phase = 0.37; s.busy = "Syncing…".into(); }),
             ("tr", |s| { demo(s); s.tr = true; s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
         ],
-        ..AppSpec::new("WavySync", (W, H), init, view)
+        ..AppSpec::new("WavySync", (W, H), if demo_mode { init_demo } else { init }, view)
     };
     // WAVYSYNC_BACKGROUND opens the window offscreen without focus, for smoke tests.
     let background = std::env::var_os("WAVYSYNC_BACKGROUND").is_some();
