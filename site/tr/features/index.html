@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Özellikler: Wave Terminal için Push, Pull ve canlı senkron · WavySync</title>
+<meta name="description" content="Wave Terminal düzenini Push ve Pull ile gönder ve geri getir, ayarları ve widget'ları canlı senkronla, herhangi bir bilgisayarın profilini uygula, widget araçlarını otomatik kur.">
+<link rel="canonical" href="https://wavysync.vercel.app/tr/features/">
+<meta name="google-site-verification" content="s66rd8O_x1saL6PLGpSpIPeHmGazHyTo27NTPkK-GJg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WavySync">
+<meta property="og:url" content="https://wavysync.vercel.app/tr/features/">
+<meta property="og:title" content="Özellikler: Wave Terminal için Push, Pull ve canlı senkron · WavySync">
+<meta property="og:description" content="Wave Terminal düzenini Push ve Pull ile gönder ve geri getir, ayarları ve widget'ları canlı senkronla, herhangi bir bilgisayarın profilini uygula, widget araçlarını otomatik kur.">
+<meta property="og:image" content="https://wavysync.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Özellikler: Wave Terminal için Push, Pull ve canlı senkron · WavySync">
+<meta name="twitter:description" content="Wave Terminal düzenini Push ve Pull ile gönder ve geri getir, ayarları ve widget'ları canlı senkronla, herhangi bir bilgisayarın profilini uygula, widget araçlarını otomatik kur.">
+<meta name="twitter:image" content="https://wavysync.vercel.app/og.png">
+<meta name="theme-color" content="#120d19">
+<link rel="alternate" hreflang="en" href="https://wavysync.vercel.app/features/">
+<link rel="alternate" hreflang="tr" href="https://wavysync.vercel.app/tr/features/">
+<link rel="alternate" hreflang="x-default" href="https://wavysync.vercel.app/features/">
+<meta property="og:locale" content="tr_TR">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">Nasıl çalışır</a>
+      <a href="./" class="on" data-i="nav.features">Özellikler</a>
+      <a href="../docs/" data-i="nav.docs">Belgeler</a>
+      <a href="../changelog/" class="opt" data-i="nav.changelog">Değişiklikler</a>
+      <a href="../download/" data-i="nav.download">İndir</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">EN</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="f.k">Özellikler</span>
+    <h1 data-i="ft.h"><em>Wavy~Sync</em> neler yapar</h1>
+    <p class="sub" data-i="ft.p">Wave Terminal'i kullandığın her bilgisayarda aynı tutan küçük bir Rust uygulaması.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="frow reveal">
+      <div><span class="caps">PUSH · PULL</span><h3 data-i="ft.pp.h">Push ve Pull</h3><p data-i="ft.pp.p">Push bu Wave'i depodaki klasörüne gönderir, düzenler dahil; penceredeki çizgiler sağa akar. Pull klasörü Wave'e geri getirir, çizgiler sola akar. İkisi de bitince bir an yeşil SYNCED görünür. Pull, Wave'i yalnızca düzenler gerçekten farklıysa kapatır.</p></div>
+      <img src="../../main.png" width="2400" height="1440" alt="Push and Pull" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">LIVE</span><h3 data-i="ft.live.h">Gürültüsüz canlı senkron</h3><p data-i="ft.live.p">Canlı senkron anahtarını açınca bir arka plan süreci ayarları, widget'ları, temaları ve bağlantıları değiştikçe gönderir. Çalışma alanları, sekmeler ve düzenler her bölme taşıdığında değişir; bu yüzden Canlı ayarlar'dan açmadıkça Push'u bekler ve açmadan önce WavySync seni GitHub'ın hız limitleri konusunda uyarır.</p></div>
+      <img src="../../live.png" width="2400" height="1440" alt="Live sync, without the noise" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">WIDGETS</span><h3 data-i="ft.w.h">Widget'lar araçlarıyla gelir</h3><p data-i="ft.w.p">WavySync her widget'ın neyi çalıştırdığını bulur: bir git deposu ve derleme adımları, bir Homebrew paketi, global bir npm paketi, bir <code>cargo install</code> ya da yanında taşıdığı küçük bir betik. Profil uygulanınca diğer bilgisayara kurulur.</p></div>
+      <img src="../../sync.png" width="2400" height="1440" alt="Widgets bring their tools" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">PROFILES</span><h3 data-i="ft.prof.h">Her bilgisayara bir klasör, her profil her yerde</h3><p data-i="ft.prof.p">Her bilgisayar adını taşıyan kendi klasörüne kaydeder, adını değiştirebilirsin. Başka bir bilgisayarın profilini uygula ve ileride yapacağın değişikliklerin nereye gideceğini seç: kendi klasörün, uyguladığın profil ya da yeni bir klasör. Önce mevcut Wave'in yedeklenir.</p></div>
+      <img src="../../apply.png" width="2400" height="1440" alt="One folder per computer, any profile anywhere" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">REPO</span><h3 data-i="ft.repo.h">Senin deponun, private ya da public</h3><p data-i="ft.repo.p">GitHub ile giriş yapıp private bir depo seç ya da oluştur, ya da public bir depoyu bu bilgisayarın kendi git girişiyle misafir olarak kullan. Bir şey çıkmadan önce anahtarlar, token'lar ve parolalar ayıklanır; ev klasörün <code>{HOME}</code> olarak saklanır, böylece yollar başka bir kullanıcı adında da çalışır.</p></div>
+      <img src="../../repo.png" width="2400" height="1440" alt="Your repo, private or public" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="caps" data-i="ft.gk">Bir bakışta</span>
+    <h2 data-i="f.h">Senkronizasyon Seçenekleri</h2>
+    <div class="grid">
+      <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Düzenler olduğu gibi gelir</h3><p data-i="f1.p">Çalışma alanları, sekmeler, bloklar ve bölme düzenin, doğrudan Wave'in veritabanından.</p></div>
+      <div class="card reveal"><span class="k">WIDGETS</span><h3 data-i="f2.h">Araçlarıyla birlikte widget'lar</h3><p data-i="f2.p">Git depoları ve derleme adımları, Homebrew, npm, cargo ya da widget'ın çalıştırdığı küçük betik.</p></div>
+      <div class="card reveal"><span class="k">PROFILES</span><h3 data-i="f3.h">Her bilgisayara bir klasör</h3><p data-i="f3.p">Varsayılan adı bilgisayarın adı. Değiştir, başkasını uygula ya da yenisini aç.</p></div>
+      <div class="card reveal"><span class="k">PUSH · PULL · LIVE</span><h3 data-i="f4.h">Push, Pull ya da canlı</h3><p data-i="f4.p">Push istediğin an her şeyi gönderir, Pull geri getirir. Canlı senkron ayarları ve widget'ları değiştikçe gönderir; düzenler Push'u bekler.</p></div>
+      <div class="card reveal"><span class="k">PRIVATE</span><h3 data-i="f5.h">Gizli bilgiler evde kalır</h3><p data-i="f5.p">Token, anahtar ve parolalar ayıklanır. Ev klasörün {HOME} olur.</p></div>
+      <div class="card reveal"><span class="k">NATIVE</span><h3 data-i="f6.h">Küçük bir Rust uygulaması</h3><p data-i="f6.p">macOS, Windows ve Linux için tek dosya, Rune ile çizilmiş; bir de Wave kenar çubuğunda widget.</p></div>
+    </div>
+    <div style="margin-top:26px"><div class="never reveal">
+      <h3 data-i="n.h">Bilgisayarından hiç çıkmayanlar</h3>
+      <ul>
+        <li data-i="n.1"><code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code> gibi adlı anahtarlar</li>
+        <li data-i="n.2">Terminal geçmişi ve kaydırma arabelleği</li>
+        <li data-i="n.3">GitHub girişin: sistem anahtar zincirinde kalır</li>
+        <li data-i="n.4">İşaretlemediğin her şey</li>
+      </ul>
+    </div></div>
+    <a class="more" href="../download/" data-i="more.dl">İndirme sayfası →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir.</span>
+  </div>
+</footer>
+
+<script src="../../site.js"></script>
+</body>
+</html>

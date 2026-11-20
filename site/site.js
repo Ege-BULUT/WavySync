@@ -63,9 +63,23 @@ function setLang(tr) {
 }
 let saved = null;
 try { saved = localStorage.getItem("wvysy-lang"); } catch (e) {}
-let tr = saved ? saved === "tr" : (navigator.language || "").toLowerCase().startsWith("tr");
-if (tr) setLang(true);
-document.getElementById("lang").addEventListener("click", () => { tr = !tr; setLang(tr); });
+// Every page has an English URL and a Turkish one under /tr/, linked by hreflang. The button
+// goes to the other one. Inside the site editor's frame the text still swaps in place.
+const isTr = document.documentElement.lang === "tr";
+const twin = document.querySelector(`link[rel="alternate"][hreflang="${isTr ? "en" : "tr"}"]`);
+if (twin && !window.frameElement) {
+  const local = new URL(twin.href).pathname;
+  const want = saved ? saved === "tr" : isTr || (navigator.language || "").toLowerCase().startsWith("tr");
+  if (want !== isTr && location.protocol !== "file:") location.replace(local + location.hash);
+  document.getElementById("lang").addEventListener("click", () => {
+    try { localStorage.setItem("wvysy-lang", isTr ? "en" : "tr"); } catch (e) {}
+    location.href = local + location.hash;
+  });
+} else {
+  let tr = saved ? saved === "tr" : (navigator.language || "").toLowerCase().startsWith("tr");
+  if (tr !== isTr) setLang(tr);
+  document.getElementById("lang").addEventListener("click", () => { tr = !tr; setLang(tr); });
+}
 
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .12 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));

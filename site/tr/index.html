@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WavySync: Wave Terminal ayarlarını, düzenlerini ve widget'larını bilgisayarlar arasında senkronla</title>
+<meta name="description" content="WavySync, Wave Terminal'i macOS, Windows ve Linux arasında senkronlar: ayarlar, çalışma alanları, sekmeler, düzenler, widget'lar ve arkalarındaki araçlar, senin GitHub deponla. Ücretsiz ve açık kaynak.">
+<link rel="canonical" href="https://wavysync.vercel.app/tr/">
+<meta name="google-site-verification" content="s66rd8O_x1saL6PLGpSpIPeHmGazHyTo27NTPkK-GJg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WavySync">
+<meta property="og:url" content="https://wavysync.vercel.app/tr/">
+<meta property="og:title" content="WavySync: Wave Terminal ayarlarını, düzenlerini ve widget'larını bilgisayarlar arasında senkronla">
+<meta property="og:description" content="WavySync, Wave Terminal'i macOS, Windows ve Linux arasında senkronlar: ayarlar, çalışma alanları, sekmeler, düzenler, widget'lar ve arkalarındaki araçlar, senin GitHub deponla. Ücretsiz ve açık kaynak.">
+<meta property="og:image" content="https://wavysync.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WavySync: Wave Terminal ayarlarını, düzenlerini ve widget'larını bilgisayarlar arasında senkronla">
+<meta name="twitter:description" content="WavySync, Wave Terminal'i macOS, Windows ve Linux arasında senkronlar: ayarlar, çalışma alanları, sekmeler, düzenler, widget'lar ve arkalarındaki araçlar, senin GitHub deponla. Ücretsiz ve açık kaynak.">
+<meta name="twitter:image" content="https://wavysync.vercel.app/og.png">
+<meta name="theme-color" content="#120d19">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "WavySync", "applicationCategory": "DeveloperApplication", "operatingSystem": "macOS, Windows, Linux", "url": "https://wavysync.vercel.app/", "downloadUrl": "https://github.com/Ege-BULUT/WavySync/releases/latest", "softwareVersion": "0.1.0", "license": "https://opensource.org/licenses/MIT", "image": "https://wavysync.vercel.app/og.png", "description": "WavySync syncs Wave Terminal across macOS, Windows and Linux: settings, workspaces, tabs, layouts, widgets and the tools behind them, through a GitHub repo you own. Free and open source.", "author": {"@type": "Person", "name": "Ege BULUT", "url": "https://github.com/Ege-BULUT"}, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "codeRepository": "https://github.com/Ege-BULUT/WavySync"}</script>
+<link rel="alternate" hreflang="en" href="https://wavysync.vercel.app/">
+<link rel="alternate" hreflang="tr" href="https://wavysync.vercel.app/tr/">
+<link rel="alternate" hreflang="x-default" href="https://wavysync.vercel.app/">
+<meta property="og:locale" content="tr_TR">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="./">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="#how" class="opt" data-i="nav.how">Nasıl çalışır</a>
+      <a href="features/" data-i="nav.features">Özellikler</a>
+      <a href="docs/" data-i="nav.docs">Belgeler</a>
+      <a href="changelog/" class="opt" data-i="nav.changelog">Değişiklikler</a>
+      <a href="download/" data-i="nav.download">İndir</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">EN</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg class="bg" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path class="tilde-fill" opacity=".55" d="M -40 120 H 520 C 640 120 660 210 720 300 C 760 360 800 380 900 380 H 1500 V 760 H 960 C 840 760 800 680 760 600 C 720 530 690 500 590 500 H -40 Z"/>
+    <path class="swift base" d="M -40 640 C 300 640 420 420 720 400 S 1160 170 1500 150"/>
+    <path class="swift a" d="M -40 640 C 300 640 420 420 720 400 S 1160 170 1500 150"/>
+    <path class="swift b" d="M -40 690 C 320 690 440 470 720 440 S 1140 220 1500 200"/>
+    <path class="swift c" d="M 20 90 C 160 20 340 0 560 40"/>
+    <path class="swift c" style="animation-delay:-1.4s" d="M 900 720 C 1080 750 1260 720 1440 640"/>
+  </svg>
+  <div class="wrap hero-grid">
+    <div>
+      <img class="logo" src="../logo.svg" alt="WVYSY, WavySync logo">
+      <h1 data-i="hero.h">WaveTerm'in artık&nbsp;&nbsp;<em>Senkronize !</em></h1>
+      <p class="lead" data-i="hero.p">Wavy~Sync, WaveTerm'inin ayarlarını, çalışma alanlarını, sekmelerini, düzenlerini, widget'larını ve arkalarındaki araçları senin GitHub deponla senkronize eder. Her cihazın için 'profil' olarak bir klasör oluşturur; farklı düzenlerini kaybetmeden istediğini uygulayabilirsin.</p>
+      <div class="cta">
+        <a class="btn red" href="#download" data-i="hero.dl">İndir</a>
+        <a class="btn" href="https://github.com/Ege-BULUT/WavySync" data-i="hero.gh">GitHub</a>
+      </div>
+      <div class="ticker"><span>WaVY.<b>SYnc</b></span><span>MACOS · WINDOWS · LINUX</span><span>Coded in Rust &amp; Rune</span><span>MIT</span></div>
+    </div>
+    <div class="shot"><img src="../main.png" width="2400" height="1440" alt="WavySync window: what to sync on the left, Push and Pull in the middle, the repo feed and live sync switch on the right"></div>
+  </div>
+</header>
+
+<svg class="divider" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 50 C 360 50 420 14 720 14 S 1080 50 1440 50"/><path class="run" d="M0 50 C 360 50 420 14 720 14 S 1080 50 1440 50"/></svg>
+
+<section id="waveterm">
+  <div class="wrap">
+    <details class="wt reveal">
+      <summary data-i="wt.sum">WaveTerm nedir?</summary>
+      <div class="wt-body">
+  <blockquote class="src">
+    <p>Wave is an open-source, AI-integrated terminal for macOS, Linux, and Windows. It works with any AI model. Bring your own API keys for OpenAI, Claude, or Gemini, or run local models via Ollama and LM Studio. No accounts required.</p>
+    <p>Wave also supports durable SSH sessions that survive network interruptions and restarts, with automatic reconnection. Edit remote files with a built-in graphical editor and preview files inline without leaving the terminal.</p>
+    <cite>Wave Terminal README · github.com/wavetermdev/waveterm</cite>
+  </blockquote>
+  <blockquote class="src">
+    <p>Wave is an open-source terminal with superpowers, integrating file previews, file editing, AI, web browsing, and workspace organization.</p>
+    <cite>waveterm.dev</cite>
+  </blockquote>
+  <div class="linkrow">
+    <a class="btn red" href="https://github.com/wavetermdev/waveterm/releases/latest" data-i="wt.dl">Son kararlı sürümü indir</a>
+    <a class="btn" href="https://www.waveterm.dev">waveterm.dev</a>
+    <a class="btn" href="https://github.com/wavetermdev/waveterm">GitHub</a>
+    <a class="btn" href="https://docs.waveterm.dev" data-i="wt.docs">Belgeler</a>
+  </div>
+  <p class="rel"><span data-i="wt.latest">Son kararlı sürüm:</span> <a data-wave-rel href="https://github.com/wavetermdev/waveterm/releases/tag/v0.14.5">v0.14.5</a> · <span data-wave-date>2026-04-16</span> · macOS · Windows · Linux</p>
+  <figure class="wt-shot"><img src="../waveterm/img/wave.webp" width="3680" height="2382" alt="Wave Terminal with terminals, a web view, file preview and Wave AI" loading="lazy"></figure>
+
+  <h3 class="sec" data-i="wt.fh">Özellikler</h3>
+  <p class="rel" data-i="wt.note">Wave'in kendi sözleriyle, waveterm.dev ve Wave Terminal README'sinden birebir (İngilizce).</p>
+  <div class="wt-feats">
+    <figure><img src="../waveterm/img/layouts.jpg" width="1633" height="935" alt="Screen Splitting and Layouts" loading="lazy"><figcaption><b>Screen Splitting and Layouts</b>Split screens and arrange terminals, editors, and web views into workspaces and dashboards</figcaption></figure>
+    <figure><img src="../waveterm/img/connections.png" width="1316" height="1038" alt="Manage Remote Machines" loading="lazy"><figcaption><b>Manage Remote Machines</b>Quickly switch between remote servers and clusters with our SSH connection manager (with WSL support)</figcaption></figure>
+    <figure><img src="../waveterm/img/files.webp" width="3456" height="2160" alt="Work with Remote Files" loading="lazy"><figcaption><b>Work with Remote Files</b>Navigate directories, preview markdown and images, and manage files on remote machines</figcaption></figure>
+    <figure><img src="../waveterm/img/browser.webp" width="3456" height="2160" alt="Inline Web Browser" loading="lazy"><figcaption><b>Inline Web Browser</b>Built-in web browser to access Github, StackOverflow, dashboards, and your own apps</figcaption></figure>
+  </div>
+
+  <h3 class="sec" data-i="wt.kh">Temel özellikler</h3>
+  <ul class="keyf">
+    <li>Wave AI - Context-aware terminal assistant that reads your terminal output, analyzes widgets, and performs file operations</li>
+    <li>Durable SSH Sessions - Remote terminal sessions survive connection interruptions, network changes, and Wave restarts with automatic reconnection</li>
+    <li>Flexible drag &amp; drop interface to organize terminal blocks, editors, web browsers, and AI assistants</li>
+    <li>Built-in editor for editing remote files with syntax highlighting and modern editor features</li>
+    <li>Rich file preview system for remote files (markdown, images, video, PDFs, CSVs, directories)</li>
+    <li>Quick full-screen toggle for any block - expand terminals, editors, and previews for better visibility, then instantly return to multi-block view</li>
+    <li>AI chat widget with support for multiple models (OpenAI, Claude, Azure, Perplexity, Ollama)</li>
+    <li>Command Blocks for isolating and monitoring individual commands</li>
+    <li>One-click remote connections with full terminal and file system access</li>
+    <li>Secure secret storage using native system backends - store API keys and credentials locally, access them across SSH sessions</li>
+    <li>Rich customization including tab themes, terminal styles, and background images</li>
+    <li>Powerful <code>wsh</code> command system for managing your workspace from the CLI and sharing data between terminal sessions</li>
+    <li>Connected file management with <code>wsh file</code> - seamlessly copy and sync files between local and remote SSH hosts</li>
+  </ul>
+  <p class="rel" data-i="wt.lic">Metin ve ekran görüntüleri Command Line Inc.'in Wave Terminal projesinden, Apache Lisansı 2.0. WavySync, Wave Terminal ile bağlantılı değildir.</p>
+        <a class="more" href="waveterm/" data-i="wt.page">Ayrı sayfada aç →</a>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <span class="caps" data-i="how.k">Nasıl çalışır</span>
+    <h2 data-i="how.h">Tüm <em>WaveTerm</em> şablonların kendi deponda</h2>
+    <p class="sub" data-i="how.p">Wavy~Sync varsayılan olarak her cihazın/WaveTerm profilin için yeni bir klasör açar.</p>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">01</span><h3 data-i="d1.h">Her profil kendi klasörünü günceller</h3><p data-i="d1.p">Varsayılanlar yerine istersen başka bir klasör seçebilir ya da iki sürümü de tutmak için yeni bir profil klasörü açabilirsin.</p></div>
+      <svg viewBox="0 0 1100 380" role="img" aria-label="Three computers push to their own folders in one repo">
+        <defs>
+          <linearGradient id="wireGrad" x1="0" x2="1"><stop offset="0" stop-color="#cf0a2c"/><stop offset="1" stop-color="#b79cf0"/></linearGradient>
+        </defs>
+        <path id="w1" class="wire" d="M 230 80 C 360 80 380 190 470 190"/>
+        <path id="w2" class="wire" d="M 230 190 C 330 190 380 190 470 190"/>
+        <path id="w3" class="wire" d="M 230 300 C 360 300 380 190 470 190"/>
+        <path class="wire hot" d="M 230 80 C 360 80 380 190 470 190"/>
+        <path class="wire hot" style="animation-delay:-.4s" d="M 230 190 C 330 190 380 190 470 190"/>
+        <path class="wire hot" style="animation-delay:-.8s" d="M 230 300 C 360 300 380 190 470 190"/>
+        <path id="w4" class="wire" d="M 750 190 C 810 190 800 300 860 300"/>
+
+        <g class="node" transform="translate(30 40)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">MacBook</text><text class="s" x="72" y="58">studio-mac-7f3a</text></g>
+        <g class="node" transform="translate(30 150)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Work iMac</text><text class="s" x="72" y="58">work-imac</text></g>
+        <g class="node" transform="translate(30 260)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Ubuntu lab</text><text class="s" x="72" y="58">ubuntu-lab</text></g>
+
+        <g class="node repo" transform="translate(470 90)">
+          <rect width="280" height="200" rx="20"/>
+          <text class="t" x="22" y="40">username / wave-profiles</text>
+          <text class="s" x="22" y="62" data-i="d1.repo">Private ya da Public GitHub deposu</text>
+          <text class="folder on" x="22" y="104">▸ studio-mac-7f3a/</text>
+          <text class="folder on" style="animation-delay:1s" x="22" y="134">▸ work-imac/</text>
+          <text class="folder on" style="animation-delay:2s" x="22" y="164">▸ ubuntu-lab/</text>
+        </g>
+        <g class="node" transform="translate(860 250)"><rect width="210" height="100" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36" data-i="d1.new">Yeni laptop</text><text class="s" x="72" y="58" data-i="d1.apply">work-imac uygula</text><text class="s" x="72" y="80" fill="#4fd18b">✓ ready</text></g>
+        <text class="s" x="860" y="226" fill="#9a8fae" style="font:500 12px var(--mono)" data-i="d1.pull">Profili çeker</text>
+        <circle class="pkt" r="6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
+        <circle class="pkt v" r="7"><animateMotion dur="3.6s" begin=".6s" repeatCount="indefinite"><mpath href="#w4"/></animateMotion></circle>
+      </svg>
+    </div>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">02</span><h3 data-i="d2.h">Profil nasıl uygulanır</h3></div>
+      <div class="steps">
+        <div class="rail" aria-hidden="true"><svg viewBox="0 0 1000 30" preserveAspectRatio="none"><path d="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15" fill="none" stroke="#3a2d4f" stroke-width="2"/><circle r="6" fill="#ff3355"><animateMotion dur="10s" repeatCount="indefinite" path="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15"/></circle></svg></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><span class="n">01</span><h4 data-i="s1.h">Seç</h4><p data-i="s1.p">Profili ve ileride değişikliklerin nereye kaydedileceğini seç.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></div><span class="n">02</span><h4 data-i="s2.h">Yedekle</h4><p data-i="s2.p">Bu Wave yerel bir yedek klasörüne kaydedilir.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div><span class="n">03</span><h4 data-i="s3.h">Wave'i kapat</h4><p data-i="s3.p">Veritabanı güvenle yazılsın diye Wave kapanır.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h10l6 6-6 6H4z"/></svg></div><span class="n">04</span><h4 data-i="s4.h">Yaz ve kur</h4><p data-i="s4.p">Düzen senkronlanır; widget araçları kurulur ve kullanıma hazır olur.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/></svg></div><span class="n">05</span><h4 data-i="s5.h">Yeniden canlı</h4><p data-i="s5.p">Wave yeniden açılır, değişiklikler seçtiğin klasöre akar.</p></div>
+      </div>
+    </div>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">03</span><h3 data-i="d3.h">Widget'lar bağımlılıklarını da getirir</h3><p data-i="d3.p">WavySync her widget'ın neyi çalıştırdığını okur ve diğer tarafa kurar.</p></div>
+      <div class="deps">
+        <div class="wcard">
+          <div class="caps" style="margin-bottom:10px" data-i="d3.w">Widget'lar</div>
+          <div class="row"><span class="chk">✓</span>clock</div>
+          <div class="row"><span class="chk">✓</span>chat</div>
+          <div class="row"><span class="chk">✓</span>btop</div>
+        </div>
+        <div class="chips">
+          <div class="chip"><b>git</b>clone someone/wave-clock<span class="ok">✓ cloned</span></div>
+          <div class="chip"><b>build</b>npm ci && npm run build<span class="ok">✓ built</span></div>
+          <div class="chip"><b>file</b>{HOME}/.local/bin/chat<span class="ok">✓ written</span></div>
+          <div class="chip"><b>brew</b>install btop<span class="ok">✓ installed</span></div>
+        </div>
+      </div>
+    </div>
+    <a class="more" href="docs/" data-i="more.docs">Belgeleri oku →</a>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <span class="caps" data-i="f.k">Özellikler</span>
+    <h2 data-i="f.h">Senkronizasyon Seçenekleri</h2>
+    <p class="sub" data-i="f.p">Neyin taşınacağını sen seç. Her bölümün kendi anahtarı, her widget'ın kendi kutusu var.</p>
+    <div class="grid">
+      <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Düzenler olduğu gibi gelir</h3><p data-i="f1.p">Çalışma alanları, sekmeler, bloklar ve bölme düzenin, doğrudan Wave'in veritabanından.</p></div>
+      <div class="card reveal"><span class="k">WIDGETS</span><h3 data-i="f2.h">Araçlarıyla birlikte widget'lar</h3><p data-i="f2.p">Git depoları ve derleme adımları, Homebrew, npm, cargo ya da widget'ın çalıştırdığı küçük betik.</p></div>
+      <div class="card reveal"><span class="k">PROFILES</span><h3 data-i="f3.h">Her bilgisayara bir klasör</h3><p data-i="f3.p">Varsayılan adı bilgisayarın adı. Değiştir, başkasını uygula ya da yenisini aç.</p></div>
+      <div class="card reveal"><span class="k">PUSH · PULL · LIVE</span><h3 data-i="f4.h">Push, Pull ya da canlı</h3><p data-i="f4.p">Push istediğin an her şeyi gönderir, Pull geri getirir. Canlı senkron ayarları ve widget'ları değiştikçe gönderir; düzenler Push'u bekler.</p></div>
+      <div class="card reveal"><span class="k">PRIVATE</span><h3 data-i="f5.h">Gizli bilgiler evde kalır</h3><p data-i="f5.p">Token, anahtar ve parolalar ayıklanır. Ev klasörün {HOME} olur.</p></div>
+      <div class="card reveal"><span class="k">NATIVE</span><h3 data-i="f6.h">Küçük bir Rust uygulaması</h3><p data-i="f6.p">macOS, Windows ve Linux için tek dosya, Rune ile çizilmiş; bir de Wave kenar çubuğunda widget.</p></div>
+    </div>
+    <a class="more" href="features/" data-i="more.f">Tüm özellikler →</a>
+  </div>
+</section>
+
+<section id="screens">
+  <div class="wrap">
+    <span class="caps" data-i="g.k">Uygulama</span>
+    <h2 data-i="g.h"><em>Wavy~Sync</em> Başlatıcı</h2>
+    <div class="gallery">
+      <figure class="reveal"><img src="../sync.png" width="2400" height="1440" alt="Step 1, what to sync" loading="lazy"><figcaption data-i="g1">01 · Ne senkronlansın, widget'lar açık</figcaption></figure>
+      <figure class="reveal"><img src="../repo.png" width="2400" height="1440" alt="Step 2, repo" loading="lazy"><figcaption data-i="g2">02 · Depoların ya da yeni bir depo</figcaption></figure>
+      <figure class="reveal"><img src="../apply.png" width="2400" height="1440" alt="Apply dialog" loading="lazy"><figcaption data-i="g3">03 · Uygula, değişikliklerin nereye gideceğini seç</figcaption></figure>
+      <figure class="reveal"><img src="../main.png" width="2400" height="1440" alt="Push and Pull buttons" loading="lazy"><figcaption data-i="g4">Push ve Pull, canlı senkron anahtarıyla</figcaption></figure>
+      <figure class="reveal"><img src="../pull.png" width="2400" height="1440" alt="Pull running" loading="lazy"><figcaption data-i="g5">Pull: depo gelirken çizgiler geri akar</figcaption></figure>
+      <figure class="reveal"><img src="../live.png" width="2400" height="1440" alt="Live settings" loading="lazy"><figcaption data-i="g6">Canlı ayarlar: düzenler Push'u bekler</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="layout">
+  <div class="wrap split">
+    <div>
+      <span class="caps" data-i="l.k">Depoda</span>
+      <h2 data-i="l.h">Kolay arkaplan yapısı.</h2>
+      <pre class="tree"><span class="r">your-wave-profiles/</span>
+├── studio-mac-7f3a/
+│   ├── wavysync.json     <span class="c"># host, system, last update</span>
+│   ├── config/           <span class="c"># settings, widgets, themes</span>
+│   ├── workspaces.json   <span class="c"># workspaces, tabs, layouts</span>
+│   ├── extensions.json   <span class="c"># what widgets need</span>
+│   └── files/            <span class="c"># small scripts, under {HOME}</span>
+├── work-imac-2c91/
+└── ubuntu-lab-04be/</pre>
+    </div>
+    <div class="never reveal" style="margin-top:58px">
+      <h3 data-i="n.h">Bilgisayarından hiç çıkmayanlar</h3>
+      <ul>
+        <li data-i="n.1"><code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code> gibi adlı anahtarlar</li>
+        <li data-i="n.2">Terminal geçmişi ve kaydırma arabelleği</li>
+        <li data-i="n.3">GitHub girişin: sistem anahtar zincirinde kalır</li>
+        <li data-i="n.4">İşaretlemediğin her şey</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <span class="caps" data-i="dl.k">İndir</span>
+    <h2 data-i="dl.h"><em>Wavy~Sync</em>'i indir!</h2>
+    <div class="dl">
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-arm64.tar.gz"><b>macOS</b><span>Apple silicon</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-x64.tar.gz"><b>macOS</b><span>Intel</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-windows-x64.exe"><b>Windows</b><span>x64</span><i>.exe ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-linux-x64.tar.gz"><b>Linux</b><span>x64</span><i>.tar.gz ↓</i></a>
+    </div>
+    <p class="note" data-i="dl.n">Henüz imzalı değil. macOS'ta bir kez <code>xattr -d com.apple.quarantine ./wavysync</code> çalıştır. <code>git</code> gerekir.</p>
+    <a class="more" href="download/" data-i="more.dl">İndirme sayfası →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir.</span>
+  </div>
+</footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

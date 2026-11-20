@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belgeler: WavySync ile Wave Terminal nasıl senkronlanır</title>
+<meta name="description" content="WavySync'i kur, Wave Terminal düzenini Push ve Pull ile taşı, canlı senkronu kullan, profil uygula, depo yapısını ve komut satırını öğren.">
+<link rel="canonical" href="https://wavysync.vercel.app/tr/docs/">
+<meta name="google-site-verification" content="s66rd8O_x1saL6PLGpSpIPeHmGazHyTo27NTPkK-GJg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WavySync">
+<meta property="og:url" content="https://wavysync.vercel.app/tr/docs/">
+<meta property="og:title" content="Belgeler: WavySync ile Wave Terminal nasıl senkronlanır">
+<meta property="og:description" content="WavySync'i kur, Wave Terminal düzenini Push ve Pull ile taşı, canlı senkronu kullan, profil uygula, depo yapısını ve komut satırını öğren.">
+<meta property="og:image" content="https://wavysync.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Belgeler: WavySync ile Wave Terminal nasıl senkronlanır">
+<meta name="twitter:description" content="WavySync'i kur, Wave Terminal düzenini Push ve Pull ile taşı, canlı senkronu kullan, profil uygula, depo yapısını ve komut satırını öğren.">
+<meta name="twitter:image" content="https://wavysync.vercel.app/og.png">
+<meta name="theme-color" content="#120d19">
+<link rel="alternate" hreflang="en" href="https://wavysync.vercel.app/docs/">
+<link rel="alternate" hreflang="tr" href="https://wavysync.vercel.app/tr/docs/">
+<link rel="alternate" hreflang="x-default" href="https://wavysync.vercel.app/docs/">
+<meta property="og:locale" content="tr_TR">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">Nasıl çalışır</a>
+      <a href="../features/" data-i="nav.features">Özellikler</a>
+      <a href="./" class="on" data-i="nav.docs">Belgeler</a>
+      <a href="../changelog/" class="opt" data-i="nav.changelog">Değişiklikler</a>
+      <a href="../download/" data-i="nav.download">İndir</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">EN</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="docs.k">Belgeler</span>
+    <h1 data-i="docs.h"><em>Wavy~Sync</em> nasıl kullanılır</h1>
+    <p class="sub" data-i="docs.p">İlk açılıştan komut satırına kadar her şey.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap doc">
+    <div class="toc">
+      <div class="toc-list" data-l="tr">
+      <a href="#start-tr">Başlangıç</a>
+      <a href="#setup-tr">Kurulum</a>
+      <a href="#push-pull-tr">Push ve Pull</a>
+      <a href="#live-tr">Canlı senkron</a>
+      <a href="#apply-tr">Profil uygulama</a>
+      <a href="#repo-tr">Depo</a>
+      <a href="#private-tr">Gizli kalanlar</a>
+      <a href="#cli-tr">Komut satırı</a>
+      <a href="#files-tr">Dosyalar ve ayarlar</a>
+      <a href="#remove-tr">Kaldırma</a>
+      <a href="#trouble-tr">Sorun giderme</a>
+      </div>
+    </div>
+    <div class="prose">
+      <div data-l="tr">
+        <h2 id="start-tr">Başlangıç</h2>
+        <p>WavySync, senin GitHub deponla Wave Terminal'i her bilgisayarda aynı tutar. Her bilgisayar o depoda kendi klasörüne yazar ve herhangi bir bilgisayar bir başkasının düzenini alabilir. <a href="../download/">İndir</a>, çalıştır; kurulum açılır.</p>
+
+        <h2 id="setup-tr">Kurulum</h2>
+        <p>İlk açılışta üç adım gelir:</p>
+        <ol>
+          <li><b>01 Sync:</b> neyin taşınacağını işaretle: ayarlar, çalışma alanları ve düzenler, widget'lar ve eklentiler (her widget'ın kendi kutusu var), temalar, bağlantılar, AI modları.</li>
+          <li><b>02 Repo:</b> GitHub ile giriş yapıp bir depo seç ya da oluştur, ya da misafir modunda bu bilgisayarın kendi git girişiyle kullanmak için public bir depo yapıştır.</li>
+          <li><b>03 Profile:</b> bu bilgisayarın klasörüne ad ver (bilgisayarın kimliğiyle başlar) ve istersen başka bir bilgisayarın profilini uygula.</li>
+        </ol>
+        <p>Kurulum bitince WavySync, Wave'in kenar çubuğuna bir WavySync widget'ı ve oturum açılışına bir arka plan süreci ekler.</p>
+
+        <h2 id="push-pull-tr">Push ve Pull</h2>
+        <p><b>Push</b>, Wave'in ayar dosyalarını ve çalışma alanı veritabanını okur (yalnızca okur), gizli bilgileri ve yerel gürültüyü ayıklar ve değişeni bu bilgisayarın klasörüne commit eder. Düzenler dahildir.</p>
+        <p><b>Pull</b>, bu bilgisayarın depodaki klasörünü Wave'e geri yazar. Gelen çalışma alanları ve düzenler Wave'dekiyle aynıysa Wave açık kalır; farklıysa Wave'in kapanması istenir, dosyalar yazılır ve Wave yeniden açılır. Wave soru sorarsa onayla.</p>
+        <p>Bir şey yazılmadan önce mevcut Wave'in yedeklenir.</p>
+
+        <h2 id="live-tr">Canlı senkron</h2>
+        <p>Canlı senkron anahtarı açıkken arka plan süreci 30 saniyede bir bakar ve <b>Canlı ayarlar</b>'da canlı işaretli öğeleri gönderir. Klasördeki diğer her şey son Push'taki haliyle kalır.</p>
+        <table>
+          <tr><th>Öğe</th><th>Varsayılan olarak canlı</th></tr>
+          <tr><td>Ayarlar</td><td>Evet</td></tr>
+          <tr><td>Widget'lar ve eklentiler</td><td>Evet</td></tr>
+          <tr><td>Temalar, ön ayarlar, arka planlar</td><td>Evet</td></tr>
+          <tr><td>Bağlantılar (SSH)</td><td>Evet</td></tr>
+          <tr><td>AI modları</td><td>Evet</td></tr>
+          <tr><td>Çalışma alanları, sekmeler, düzenler</td><td>Hayır: sadece Push</td></tr>
+        </table>
+        <p>Çalışma alanları, sekmeler ve düzenler her bölme taşıdığında ya da sekme açtığında değişir. Bunları canlı göndermek neredeyse her değişiklikte bir commit demek ve GitHub'ın hız limitleri çabuk dolabilir. Önerilen yol, bunları gerektiğinde Push ile göndermek.</p>
+
+        <h2 id="apply-tr">Profil uygulama</h2>
+        <p>Bir profil (herhangi bir bilgisayarın klasörü) seç ve bu bilgisayarın ileride yapacağı değişikliklerin nereye kaydedileceğini belirle: kendi klasörü, az önce uyguladığın profil (üzerine yazılacağı konusunda uyarılırsın) ya da yeni bir klasör. Sonra WavySync:</p>
+        <ol>
+          <li>mevcut Wave'i <code>~/.config/wavysync/backups</code> klasörüne yedekler,</li>
+          <li>Wave'in kapanmasını ister,</li>
+          <li>profili yazar ve widget'larının ihtiyaç duyduklarını kurar,</li>
+          <li>Wave'i yeniden açar ve bundan sonra seçtiğin klasöre gönderir.</li>
+        </ol>
+
+        <h2 id="repo-tr">Depo</h2>
+<pre><code>your-wave-profiles/                 senin GitHub deponun
+├── studio-mac-7f3a/                her bilgisayara bir klasör
+│   ├── wavysync.json               makine, sistem, son güncelleme
+│   ├── config/                     settings.json, widgets.json, temalar, ön ayarlar, bağlantılar
+│   ├── workspaces.json             çalışma alanları, sekmeler, bloklar, düzenler
+│   ├── extensions.json             her widget'ın neye ihtiyacı olduğu ve nasıl kurulacağı
+│   └── files/                      widget'ların çalıştırdığı küçük betikler, {HOME} altında
+├── work-imac-2c91/
+└── ubuntu-lab-04be/</code></pre>
+        <p>Hepsi düz dosya. Ev klasörün <code>{HOME}</code> olarak saklanır; böylece yollar başka bir kullanıcı adında da çalışır.</p>
+
+        <h2 id="private-tr">Gizli kalanlar</h2>
+        <ul>
+          <li>Adında <code>token</code>, <code>secret</code>, <code>password</code>, <code>passwd</code>, <code>apikey</code>, <code>api_key</code> ya da <code>privatekey</code> geçen anahtarlar.</li>
+          <li>Wave'in terminal geçmişi ve kaydırma arabelleği.</li>
+          <li>WavySync'in kendi GitHub girişi; sistem anahtar zincirinde kalır.</li>
+          <li>İşaretlemediğin her şey.</li>
+        </ul>
+
+        <h2 id="cli-tr">Komut satırı</h2>
+<pre><code>wavysync                 pencereyi aç
+wavysync --sync          şimdi gönder, seçili her şey
+wavysync --pull          bu bilgisayarın klasörünü depodan Wave'e getir
+wavysync --profiles      depodaki profilleri listele
+wavysync --apply AD [--save-to KLASÖR]
+                         bu Wave'i AD profiline ayarla
+wavysync --detect        bulunan widget'ları ve neye ihtiyaç duyduklarını yaz
+wavysync --setup DEPO [--folder AD] [--guest]
+                         pencere olmadan kur</code></pre>
+
+        <h2 id="files-tr">Dosyalar ve ayarlar</h2>
+        <table>
+          <tr><td><code>~/.config/wavysync/config.json</code></td><td>WavySync'in ayarları. <code>WAVYSYNC_HOME</code> klasörü taşır.</td></tr>
+          <tr><td><code>~/.config/wavysync/backups</code></td><td>Her uygulama ya da Pull öncesinde Wave'in yedeği.</td></tr>
+          <tr><td><code>WAVETERM_CONFIG_HOME</code>, <code>WAVETERM_DATA_HOME</code></td><td>Tanımlıysa Wave'in yaptığı gibi bunlar kullanılır.</td></tr>
+        </table>
+
+        <h2 id="remove-tr">Kaldırma</h2>
+        <ol>
+          <li>Arka plan sürecini oturum açılışından kaldır: macOS'ta <code>~/Library/LaunchAgents/app.wavysync.plist</code>, Windows'ta <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code> altındaki <code>WavySync</code> değeri, Linux'ta <code>~/.config/autostart/wavysync.desktop</code>.</li>
+          <li>Wave'in <code>widgets.json</code> dosyasından ya da widget ayarlarından <code>wavysync</code> girdisini sil.</li>
+          <li><code>~/.config/wavysync</code> klasörünü ve programı sil. Deponun GitHub'da kalır.</li>
+        </ol>
+
+        <h2 id="trouble-tr">Sorun giderme</h2>
+        <h3>macOS uygulamanın hasarlı ya da bilinmeyen bir geliştiriciden olduğunu söylüyor</h3>
+        <p>Dosyalar henüz imzalı değil. Bir kez <code>xattr -d com.apple.quarantine ./wavysync</code> çalıştır.</p>
+        <h3>macOS anahtar zinciri izni istiyor</h3>
+        <p>GitHub girişi anahtar zincirinde durur. Yeni bir derleme macOS için yeni bir programdır, bu yüzden güncellemeden sonra yeniden sorar. Her Zaman İzin Ver'i seç.</p>
+        <h3>Pull ya da Uygula sırasında Wave kapatma sorusu soruyor</h3>
+        <p>Bu, Wave'in kapanabileceğini onaylamasıdır. Onayla; WavySync dosyaları yazar ve Wave'i yeniden açar.</p>
+        <h3>Bir şey gelmedi</h3>
+        <p>01. adımda, canlı senkron içinse Canlı ayarlar'da işaretli olduğuna bak. Yine gelmiyorsa <a href="https://github.com/Ege-BULUT/WavySync/issues">bir issue aç</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir.</span>
+  </div>
+</footer>
+
+<script src="../../site.js"></script>
+</body>
+</html>
