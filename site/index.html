@@ -7,7 +7,7 @@
 <meta name="description" content="Sync Wave Terminal across computers: settings, workspaces, tabs, layouts, widgets and the tools behind them, through a GitHub repo you own.">
 <meta property="og:title" content="WavySync">
 <meta property="og:description" content="Your Wave Terminal, on every computer.">
-<meta property="og:image" content="https://wavysync.vercel.app/sync.png">
+<meta property="og:image" content="https://wavysync.vercel.app/main.png">
 <meta name="theme-color" content="#120d19">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -220,7 +220,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
       </div>
       <div class="ticker"><span>WaVY.<b>SYnc</b></span><span>MACOS · WINDOWS · LINUX</span><span>Coded in Rust &amp; Rune</span><span>MIT</span></div>
     </div>
-    <div class="shot"><img src="live.png" width="2400" height="1440" alt="WavySync window: what to sync on the left, live sync feed on the right"></div>
+    <div class="shot"><img src="main.png" width="2400" height="1440" alt="WavySync window: what to sync on the left, Push and Pull in the middle, the repo feed and live sync switch on the right"></div>
   </div>
 </header>
 
@@ -308,7 +308,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
       <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Layouts come across whole</h3><p data-i="f1.p">Workspaces, tabs, blocks and how you split them, read straight from Wave's database.</p></div>
       <div class="card reveal"><span class="k">WIDGETS</span><h3 data-i="f2.h">Widgets with their tools</h3><p data-i="f2.p">Git repos and build steps, Homebrew, npm, cargo, or the small script a widget runs.</p></div>
       <div class="card reveal"><span class="k">PROFILES</span><h3 data-i="f3.h">One folder per computer</h3><p data-i="f3.p">Named after the computer by default. Rename it, apply another, or start a new one.</p></div>
-      <div class="card reveal"><span class="k">LIVE</span><h3 data-i="f4.h">Pushes as you go</h3><p data-i="f4.p">A quiet background process commits only when something actually changed.</p></div>
+      <div class="card reveal"><span class="k">PUSH · PULL · LIVE</span><h3 data-i="f4.h">Push, Pull, or live</h3><p data-i="f4.p">Push sends everything when you say so; Pull brings it back. Live sync sends settings and widgets as they change, and layouts wait for Push.</p></div>
       <div class="card reveal"><span class="k">PRIVATE</span><h3 data-i="f5.h">Secrets stay home</h3><p data-i="f5.p">Tokens, keys and passwords are stripped. Your home folder becomes {HOME}.</p></div>
       <div class="card reveal"><span class="k">NATIVE</span><h3 data-i="f6.h">Small Rust app</h3><p data-i="f6.p">One binary for macOS, Windows and Linux, drawn with Rune, plus a widget in Wave's sidebar.</p></div>
     </div>
@@ -323,7 +323,9 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
       <figure class="reveal"><img src="sync.png" width="2400" height="1440" alt="Step 1, what to sync" loading="lazy"><figcaption data-i="g1">01 · What to sync, widgets expanded</figcaption></figure>
       <figure class="reveal"><img src="repo.png" width="2400" height="1440" alt="Step 2, repo" loading="lazy"><figcaption data-i="g2">02 · Your repos, or a new one</figcaption></figure>
       <figure class="reveal"><img src="apply.png" width="2400" height="1440" alt="Apply dialog" loading="lazy"><figcaption data-i="g3">03 · Apply, and choose where changes go</figcaption></figure>
-      <figure class="reveal"><img src="live.png" width="2400" height="1440" alt="Live sync" loading="lazy"><figcaption data-i="g4">Live sync feed</figcaption></figure>
+      <figure class="reveal"><img src="main.png" width="2400" height="1440" alt="Push and Pull buttons" loading="lazy"><figcaption data-i="g4">Push and Pull, with the live sync switch</figcaption></figure>
+      <figure class="reveal"><img src="pull.png" width="2400" height="1440" alt="Pull running" loading="lazy"><figcaption data-i="g5">Pull: the lines flow back while the repo comes in</figcaption></figure>
+      <figure class="reveal"><img src="live.png" width="2400" height="1440" alt="Live settings" loading="lazy"><figcaption data-i="g6">Live settings: layouts wait for Push</figcaption></figure>
     </div>
   </div>
 </section>
@@ -397,11 +399,11 @@ const TR = {
   "f1.h": "Düzenler olduğu gibi gelir", "f1.p": "Çalışma alanları, sekmeler, bloklar ve bölme düzenin, doğrudan Wave'in veritabanından.",
   "f2.h": "Araçlarıyla birlikte widget'lar", "f2.p": "Git depoları ve derleme adımları, Homebrew, npm, cargo ya da widget'ın çalıştırdığı küçük betik.",
   "f3.h": "Her bilgisayara bir klasör", "f3.p": "Varsayılan adı bilgisayarın adı. Değiştir, başkasını uygula ya da yenisini aç.",
-  "f4.h": "Sen çalıştıkça gönderir", "f4.p": "Sessiz bir arka plan süreci yalnızca gerçekten bir şey değiştiğinde commit atar.",
+  "f4.h": "Push, Pull ya da canlı", "f4.p": "Push istediğin an her şeyi gönderir, Pull geri getirir. Canlı senkron ayarları ve widget'ları değiştikçe gönderir; düzenler Push'u bekler.",
   "f5.h": "Gizli bilgiler evde kalır", "f5.p": "Token, anahtar ve parolalar ayıklanır. Ev klasörün {HOME} olur.",
   "f6.h": "Küçük bir Rust uygulaması", "f6.p": "macOS, Windows ve Linux için tek dosya, Rune ile çizilmiş; bir de Wave kenar çubuğunda widget.",
   "g.k": "Uygulama", "g.h": "<em>Wavy~Sync</em> Başlatıcı",
-  "g1": "01 · Ne senkronlansın, widget'lar açık", "g2": "02 · Depoların ya da yeni bir depo", "g3": "03 · Uygula, değişikliklerin nereye gideceğini seç", "g4": "Canlı senkron akışı",
+  "g1": "01 · Ne senkronlansın, widget'lar açık", "g2": "02 · Depoların ya da yeni bir depo", "g3": "03 · Uygula, değişikliklerin nereye gideceğini seç", "g4": "Push ve Pull, canlı senkron anahtarıyla", "g5": "Pull: depo gelirken çizgiler geri akar", "g6": "Canlı ayarlar: düzenler Push'u bekler",
   "l.k": "Depoda", "l.h": "Kolay arkaplan yapısı.",
   "n.h": "Bilgisayarından hiç çıkmayanlar",
   "n.1": "<code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code> gibi adlı anahtarlar",

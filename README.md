@@ -23,7 +23,7 @@
   <a href="#command-line">Command line</a>
 </p>
 
-<p align="center"><img src="docs/tour.gif" alt="WavySync tour: pick what to sync, pick a repo, apply a profile" width="860"></p>
+<p align="center"><img src="docs/tour.gif" alt="WavySync tour: pick what to sync, pick a repo, apply a profile, then Push and Pull" width="860"></p>
 
 ## Why
 
@@ -59,12 +59,16 @@ own folder, and any computer can take on another's setup, including the tools it
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/sync.png" alt="Step 1: what to sync, with widgets and their dependencies"></td>
-    <td width="50%"><img src="docs/repo.png" alt="Step 2: pick a repo or create one"></td>
+    <td width="50%"><img src="docs/main.png" alt="Push and Pull, the repo feed and the live sync switch"></td>
+    <td width="50%"><img src="docs/pull.png" alt="Pull running: the lines flow back while the repo comes in"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/sync.png" alt="Step 1: what to sync, with widgets and their dependencies"></td>
+    <td><img src="docs/repo.png" alt="Step 2: pick a repo or create one"></td>
   </tr>
   <tr>
     <td><img src="docs/apply.png" alt="Apply a profile and choose where future changes are saved"></td>
-    <td><img src="docs/live.png" alt="Live sync with the push feed"></td>
+    <td><img src="docs/live.png" alt="Live settings: layouts wait for Push, with the rate limit warning"></td>
   </tr>
 </table>
 
