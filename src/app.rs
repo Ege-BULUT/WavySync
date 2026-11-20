@@ -112,8 +112,9 @@ pub fn computer_id() -> String {
 }
 
 pub fn token() -> Option<String> {
+    // Set but empty: no token, and the keychain is left alone (tests, screenshots).
     if let Ok(t) = std::env::var("WAVYSYNC_TOKEN") {
-        return Some(t);
+        return (!t.is_empty()).then_some(t);
     }
     keyring::Entry::new(KEYRING_SERVICE, "github").ok()?.get_password().ok()
 }

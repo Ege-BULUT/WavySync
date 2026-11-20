@@ -95,17 +95,17 @@ h2 { font: 800 clamp(30px, 3.6vw, 44px)/1.1 var(--sans); letter-spacing: -.03em;
 @keyframes blink { 0%, 100% { fill: var(--soft); } 12% { fill: var(--red2); } 30% { fill: var(--soft); } }
 
 /* apply pipeline */
-.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 22px; position: relative; }
-.step { background: var(--panel); border: 1px solid var(--edge); border-radius: 16px; padding: 16px; position: relative; animation: lit 10s infinite; }
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 46px; position: relative; }
+.step { background: var(--panel); border: 1px solid var(--edge); border-radius: 16px; padding: 16px; position: relative; z-index: 1; animation: lit 10s infinite; }
 .step:nth-child(1) { animation-delay: 0s; } .step:nth-child(2) { animation-delay: 2s; } .step:nth-child(3) { animation-delay: 4s; } .step:nth-child(4) { animation-delay: 6s; } .step:nth-child(5) { animation-delay: 8s; }
-@keyframes lit { 0% { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 14px 40px rgba(207, 10, 44, .25); transform: translateY(-4px); } 18% { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 14px 40px rgba(207, 10, 44, .25); transform: translateY(-4px); } 24%, 100% { border-color: var(--edge); box-shadow: none; transform: none; } }
+@keyframes lit { 0%, 18% { z-index: 3; border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 14px 40px rgba(207, 10, 44, .25); transform: translateY(-4px); } 24%, 100% { z-index: 1; border-color: var(--edge); box-shadow: none; transform: none; } }
 .step .n { font: 700 12px var(--mono); color: var(--red2); letter-spacing: .12em; }
 .step h4 { margin: 8px 0 6px; font: 700 16px var(--sans); }
 .step p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
 .step .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--panel2); display: grid; place-items: center; margin-bottom: 10px; }
 .step .ic svg { width: 20px; height: 20px; stroke: var(--lilac); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.rail { position: absolute; left: 0; right: 0; top: -14px; height: 6px; }
-.rail svg { width: 100%; height: 30px; overflow: visible; }
+.rail { position: absolute; left: 0; right: 0; top: -36px; height: 28px; z-index: 4; pointer-events: none; }
+.rail svg { width: 100%; height: 28px; display: block; overflow: visible; }
 
 /* widget deps */
 .deps { display: grid; grid-template-columns: 260px 1fr; gap: 26px; align-items: center; margin-top: 18px; }
@@ -242,11 +242,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
         <path class="wire hot" d="M 230 80 C 360 80 380 190 470 190"/>
         <path class="wire hot" style="animation-delay:-.4s" d="M 230 190 C 330 190 380 190 470 190"/>
         <path class="wire hot" style="animation-delay:-.8s" d="M 230 300 C 360 300 380 190 470 190"/>
-        <path id="w4" class="wire" d="M 750 190 C 830 190 850 300 960 300"/>
-        <circle class="pkt" r="6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
-        <circle class="pkt" r="6"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
-        <circle class="pkt" r="6"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
-        <circle class="pkt v" r="7"><animateMotion dur="3.6s" begin=".6s" repeatCount="indefinite"><mpath href="#w4"/></animateMotion></circle>
+        <path id="w4" class="wire" d="M 750 190 C 810 190 800 300 860 300"/>
 
         <g class="node" transform="translate(30 40)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">MacBook</text><text class="s" x="72" y="58">studio-mac-7f3a</text></g>
         <g class="node" transform="translate(30 150)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Work iMac</text><text class="s" x="72" y="58">work-imac-2c91</text></g>
@@ -263,6 +259,10 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
         </g>
         <g class="node" transform="translate(860 250)"><rect width="210" height="100" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36" data-i="d1.new">New laptop</text><text class="s" x="72" y="58" data-i="d1.apply">apply work-imac-2c91</text><text class="s" x="72" y="80" fill="#4fd18b">✓ ready</text></g>
         <text class="s" x="860" y="226" fill="#9a8fae" style="font:500 12px var(--mono)" data-i="d1.pull">pulls a profile</text>
+        <circle class="pkt" r="6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
+        <circle class="pkt v" r="7"><animateMotion dur="3.6s" begin=".6s" repeatCount="indefinite"><mpath href="#w4"/></animateMotion></circle>
       </svg>
     </div>
 

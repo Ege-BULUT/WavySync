@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site düzenleyici</title>
+<style>
+:root {
+  --bg: #120d19; --bg2: #17111f; --panel: #1f172b; --panel2: #2a2039; --edge: #3a2d4f;
+  --violet: #6b5590; --lilac: #b79cf0; --red: #cf0a2c; --red2: #ff3355;
+  --ink: #ede6f5; --soft: #cfc4e2; --muted: #9a8fae; --ok: #4fd18b;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--sans); display: grid; grid-template-columns: 1fr 390px; overflow: hidden; }
+.stage { display: flex; flex-direction: column; min-width: 0; }
+.bar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--edge); background: var(--bg2); flex-wrap: wrap; }
+.bar .t { font-weight: 800; margin-right: auto; }
+.bar .t b { color: var(--red2); }
+.seg { display: flex; border: 1px solid var(--edge); border-radius: 9px; overflow: hidden; }
+.seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 11px; font: 600 12.5px var(--sans); cursor: pointer; }
+.seg button.on { background: var(--red); color: #fff; }
+.frame-wrap { flex: 1; min-height: 0; display: flex; justify-content: center; background: #0b0810; padding: 14px; }
+iframe { border: 1px solid var(--edge); border-radius: 12px; background: var(--bg); height: 100%; width: 100%; }
+aside { border-left: 1px solid var(--edge); background: var(--bg2); display: flex; flex-direction: column; min-height: 0; }
+aside .scroll { flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.box { background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; }
+.caps { font: 700 11px var(--mono); letter-spacing: .14em; color: var(--red2); text-transform: uppercase; }
+.muted { color: var(--muted); }
+p { margin: 6px 0 0; }
+textarea, input { width: 100%; background: #0f0b15; color: var(--ink); border: 1px solid var(--edge); border-radius: 9px; padding: 9px 10px; font: 14px/1.45 var(--sans); resize: vertical; }
+textarea:focus, input:focus { outline: none; border-color: var(--violet); }
+textarea:disabled, input:disabled { opacity: .45; }
+.btn { background: var(--panel2); border: 1px solid var(--edge); color: var(--ink); border-radius: 9px; padding: 8px 12px; font: 600 13px var(--sans); cursor: pointer; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.red { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.red:hover { background: var(--red2); }
+.save { padding: 14px 16px; border-top: 1px solid var(--edge); display: flex; flex-direction: column; gap: 8px; }
+.save .btn.red { padding: 12px; font-size: 15px; }
+.list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.item { background: #0f0b15; border: 1px solid var(--edge); border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+.item:hover { border-color: var(--violet); }
+.item .k { font: 600 11px var(--mono); color: var(--lilac); }
+.item .a { color: var(--muted); text-decoration: line-through; font-size: 12.5px; }
+.item .b { font-size: 13px; }
+.item .n { font-size: 12.5px; color: var(--soft); }
+.row { display: flex; gap: 8px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="bar">
+    <span class="t">Wavy<b>~</b>Sync site düzenleyici</span>
+    <div class="seg" id="size"><button data-w="100%" class="on">Masaüstü</button><button data-w="820px">Tablet</button><button data-w="390px">Telefon</button></div>
+    <div class="seg" id="lang"><button data-l="en">EN</button><button data-l="tr">TR</button></div>
+    <div class="seg" id="motion"><button data-m="0" class="on">Hareket durdu</button><button data-m="1">Hareket açık</button></div>
+  </div>
+  <div class="frame-wrap"><iframe id="f" src="/site/index.html" title="Site önizlemesi"></iframe></div>
+</div>
+<aside>
+  <div class="scroll">
+    <div class="box">
+      <div class="caps">Nasıl kullanılır</div>
+      <p class="muted">Önizlemede bir yazıya tıkla. Yerinde ya da aşağıdaki kutuda düzenle. Renk, boyut, yerleşim, animasyon gibi istekleri o öğenin notuna yaz. Sitedeki çevrilen yazılar TR ve EN için ayrı tutulur. Bitince Kaydet'e bas.</p>
+    </div>
+    <div class="box">
+      <div class="caps">Seçili öğe</div>
+      <p class="muted" id="selInfo">Henüz seçilmedi.</p>
+      <textarea id="selText" rows="4" disabled style="margin-top:8px"></textarea>
+      <input id="selNote" placeholder="Bu öğe için not: renk, boyut, yerleşim, animasyon..." disabled style="margin-top:8px">
+      <div class="row"><button class="btn" id="revert" disabled>Bu öğeyi geri al</button><button class="btn" id="done" disabled>Seçimi bitir</button></div>
+    </div>
+    <div class="box">
+      <div class="caps">Değişiklikler <span id="count" class="muted"></span></div>
+      <div class="list" id="list"></div>
+    </div>
+    <div class="box">
+      <div class="caps">Genel notlar</div>
+      <textarea id="general" rows="5" placeholder="Tasarım ya da içerikle ilgili genel istekler..." style="margin-top:8px"></textarea>
+    </div>
+  </div>
+  <div class="save">
+    <button class="btn red" id="save">Kaydet</button>
+    <span class="muted" id="status">Kaydedince tools/site-edits.json yazılır.</span>
+  </div>
+</aside>
+
+<script>
+const $ = id => document.getElementById(id);
+const f = $("f"), selText = $("selText"), selNote = $("selNote"), selInfo = $("selInfo");
+let doc, win, sel = null, hov = null, lang = "en";
+const edits = {}; // "scope|key" -> { key, scope: "en" | "tr" | "*", kind, label, before, after, note }
+
+const ED_CSS = `
+.ed-hover { outline: 1.5px dashed #b79cf0 !important; outline-offset: 3px; cursor: text !important; }
+.ed-sel { outline: 2px solid #ff3355 !important; outline-offset: 3px; }
+.ed-done { text-decoration: underline wavy #4fd18b 1px; text-underline-offset: 4px; }
+text.ed-hover { outline: none !important; fill: #b79cf0 !important; cursor: pointer !important; }
+text.ed-sel { fill: #ff3355 !important; }
+text.ed-done { fill: #4fd18b; }
+html.ed-still *, html.ed-still *::before, html.ed-still *::after { animation: none !important; transition: none !important; }
+html.ed-still .chip, html.ed-still .chip .ok, html.ed-still .reveal { opacity: 1 !important; transform: none !important; }
+[contenteditable] { caret-color: #ff3355; cursor: text; }
+`;
+
+const plain = s => (new DOMParser().parseFromString(s || "", "text/html").body.textContent || "").trim();
+const isSvg = el => el instanceof win.SVGElement;
+const kindOf = el => isSvg(el) ? "svgtext" : (el.children.length ? "html" : "text");
+
+function pathOf(el) {
+  if (el.dataset && el.dataset.i) return "i:" + el.dataset.i;
+  const parts = [];
+  let e = el;
+  while (e && e !== doc.body) {
+    if (e.id) { parts.unshift("#" + e.id); break; }
+    let i = 1, s = e;
+    while ((s = s.previousElementSibling)) if (s.tagName === e.tagName) i++;
+    parts.unshift(`${e.tagName.toLowerCase()}:nth-of-type(${i})`);
+    e = e.parentElement;
+  }
+  if (!parts[0].startsWith("#")) parts.unshift("body");
+  return "css:" + parts.join(" > ");
+}
+const find = key => key.startsWith("i:") ? doc.querySelector(`[data-i="${key.slice(2)}"]`) : doc.querySelector(key.slice(4));
+
+function label(el) {
+  if (el.dataset && el.dataset.i) return el.dataset.i;
+  const cls = [...el.classList].filter(c => !c.startsWith("ed-"))[0];
+  return el.tagName.toLowerCase() + (cls ? "." + cls : "") + ": " + plain(el.textContent).slice(0, 28);
+}
+
+function get(el, kind) {
+  if (kind !== "html") return el.textContent;
+  const c = el.cloneNode(true);
+  c.querySelectorAll("*").forEach(x => {
+    x.classList.remove("ed-hover", "ed-sel", "ed-done");
+    if (!x.classList.length) x.removeAttribute("class");
+    x.removeAttribute("contenteditable");
+  });
+  return c.innerHTML;
+}
+function put(el, kind, v) { if (kind === "html") el.innerHTML = v; else el.textContent = v; }
+
+function pick(t) {
+  if (!t || t.nodeType !== 1) return null;
+  if (t.closest("svg")) return t.closest("text");
+  const di = t.closest("[data-i]");
+  if (di) return di;
+  for (let e = t; e && e !== doc.body; e = e.parentElement)
+    if ([...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return e;
+  return null;
+}
+
+function select(el) {
+  clearSel();
+  const key = pathOf(el), scope = key.startsWith("i:") ? lang : "*", id = scope + "|" + key;
+  const kind = kindOf(el);
+  const e = edits[id] || { key, scope, kind, label: label(el), before: get(el, kind), after: null, note: "" };
+  sel = { el, id, e };
+  el.classList.remove("ed-hover");
+  el.classList.add("ed-sel");
+  for (const x of [selText, selNote, $("revert"), $("done")]) x.disabled = false;
+  selText.value = get(el, kind);
+  selNote.value = e.note || "";
+  selInfo.textContent = `${e.label} · ${scope === "*" ? "iki dilde aynı" : scope.toUpperCase()}${kind === "html" ? " · içinde biçim var (HTML)" : ""}`;
+  if (kind !== "svgtext") { el.contentEditable = "true"; el.focus(); } else selText.focus();
+}
+
+function clearSel() {
+  if (!sel) return;
+  sel.el.removeAttribute("contenteditable");
+  sel.el.classList.remove("ed-sel");
+  sel = null;
+  for (const x of [selText, selNote, $("revert"), $("done")]) x.disabled = true;
+  selText.value = selNote.value = "";
+  selInfo.textContent = "Henüz seçilmedi.";
+}
+
+function record() {
+  if (!sel) return;
+  const { el, id, e } = sel;
+  const now = get(el, e.kind);
+  e.after = now === e.before ? null : now;
+  e.note = selNote.value.trim();
+  if (e.after === null && !e.note) { delete edits[id]; el.classList.remove("ed-done"); }
+  else { edits[id] = e; el.classList.add("ed-done"); }
+  renderList();
+}
+
+function applyEdits() {
+  doc.querySelectorAll(".ed-done").forEach(x => x.classList.remove("ed-done"));
+  for (const e of Object.values(edits)) {
+    if (e.scope !== "*" && e.scope !== lang) continue;
+    const el = find(e.key);
+    if (!el) continue;
+    if (e.after !== null) put(el, e.kind, e.after);
+    el.classList.add("ed-done");
+  }
+}
+
+function setLang(l) {
+  clearSel();
+  lang = l;
+  win.setLang(l === "tr");
+  applyEdits();
+  document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
+}
+
+function setMotion(on) {
+  doc.documentElement.classList.toggle("ed-still", !on);
+  doc.querySelectorAll("svg").forEach(s => on ? s.unpauseAnimations() : s.pauseAnimations());
+  document.querySelectorAll("#motion button").forEach(b => b.classList.toggle("on", (b.dataset.m === "1") === on));
+}
+
+function renderList() {
+  const arr = Object.values(edits), list = $("list");
+  $("count").textContent = arr.length ? `(${arr.length})` : "";
+  list.replaceChildren();
+  if (!arr.length) { list.innerHTML = '<span class="muted">Henüz yok.</span>'; return; }
+  for (const e of arr) {
+    const d = document.createElement("div");
+    d.className = "item";
+    const add = (cls, text) => { const x = document.createElement("div"); x.className = cls; x.textContent = text; d.append(x); };
+    add("k", `${e.label} · ${e.scope === "*" ? "TR+EN" : e.scope.toUpperCase()}`);
+    if (e.after !== null) { add("a", plain(e.before).slice(0, 160)); add("b", plain(e.after).slice(0, 160)); }
+    if (e.note) add("n", "Not: " + e.note);
+    d.onclick = () => {
+      if (e.scope !== "*" && e.scope !== lang) setLang(e.scope);
+      const el = find(e.key);
+      if (el) { el.scrollIntoView({ block: "center" }); select(el); }
+    };
+    list.append(d);
+  }
+}
+
+const loaded = fetch("/tools/site-edits.json", { cache: "no-store" })
+  .then(r => r.ok ? r.json() : null)
+  .then(d => {
+    if (!d) return;
+    $("general").value = d.general_note || "";
+    for (const x of d.edits || []) {
+      const scope = x.lang === "both" ? "*" : x.lang;
+      edits[scope + "|" + x.key] = { key: x.key, scope, kind: x.kind, label: x.element, before: x.before, after: x.after, note: x.note || "" };
+    }
+  })
+  .catch(() => {});
+
+f.addEventListener("load", async () => {
+  await loaded;
+  doc = f.contentDocument; win = f.contentWindow;
+  const st = doc.createElement("style"); st.textContent = ED_CSS; doc.head.append(st);
+  doc.querySelectorAll(".reveal").forEach(x => x.classList.add("in"));
+  lang = doc.documentElement.lang === "tr" ? "tr" : "en";
+  document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
+  setMotion(false);
+
+  doc.addEventListener("click", ev => {
+    if (sel && sel.e.kind !== "svgtext" && sel.el.contains(ev.target)) { ev.preventDefault(); return; }
+    ev.preventDefault(); ev.stopPropagation();
+    const el = pick(ev.target);
+    if (el) select(el); else clearSel();
+  }, true);
+  doc.addEventListener("mouseover", ev => {
+    const el = pick(ev.target);
+    if (hov && hov !== el) hov.classList.remove("ed-hover");
+    hov = el;
+    if (el && (!sel || sel.el !== el)) el.classList.add("ed-hover");
+  });
+  doc.addEventListener("input", () => { if (sel) { selText.value = get(sel.el, sel.e.kind); record(); } });
+  doc.addEventListener("keydown", ev => {
+    if (!sel) return;
+    if (ev.key === "Escape") clearSel();
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); clearSel(); }
+  });
+  applyEdits();
+  renderList();
+});
+
+selText.addEventListener("input", () => { if (sel) { put(sel.el, sel.e.kind, selText.value); record(); } });
+selNote.addEventListener("input", record);
+$("revert").onclick = () => {
+  if (!sel) return;
+  const { el, id, e } = sel;
+  put(el, e.kind, e.before);
+  delete edits[id];
+  el.classList.remove("ed-done");
+  clearSel();
+  renderList();
+};
+$("done").onclick = clearSel;
+document.querySelectorAll("#lang button").forEach(b => b.onclick = () => setLang(b.dataset.l));
+document.querySelectorAll("#motion button").forEach(b => b.onclick = () => setMotion(b.dataset.m === "1"));
+document.querySelectorAll("#size button").forEach(b => b.onclick = () => {
+  f.style.width = b.dataset.w;
+  document.querySelectorAll("#size button").forEach(x => x.classList.toggle("on", x === b));
+});
+
+$("save").onclick = async () => {
+  record();
+  const body = {
+    page: "site/index.html",
+    general_note: $("general").value.trim(),
+    edits: Object.values(edits).map(e => ({ key: e.key, lang: e.scope === "*" ? "both" : e.scope, element: e.label, kind: e.kind, before: e.before, after: e.after, note: e.note })),
+  };
+  try {
+    const r = await fetch("/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    $("status").textContent = "Kaydedildi " + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) + " · tools/site-edits.json";
+  } catch (err) {
+    $("status").textContent = "Kaydedilemedi: " + err.message;
+  }
+};
+</script>
+</body>
+</html>

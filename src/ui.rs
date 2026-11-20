@@ -87,6 +87,50 @@ pub struct S {
     waker: Option<Waker>,
     /// Screenshot scenes: background results from this computer never land.
     demo: bool,
+    /// When a demo scene's pretend sync finishes (0: never).
+    demo_done: f32,
+    /// The red lines run while a sync or an apply is in progress.
+    flow: Flow,
+    flowing: bool,
+    flow_min: f32,
+}
+
+/// Where the background dashes are along their curves. A sync speeds them up; when it ends they
+/// glide to the next quarter cycle. Each curve carries `DASHES` evenly spaced dashes, so a quarter
+/// cycle on looks exactly like where they started.
+#[derive(Default)]
+struct Flow {
+    phase: f32,
+    speed: f32,
+    decel: Option<f32>,
+    target: f32,
+}
+
+const FLOW_V: f32 = 0.3;
+const DASHES: usize = 4;
+
+impl Flow {
+    fn env(&self) -> f32 {
+        (self.speed / FLOW_V).clamp(0.0, 1.0)
+    }
+
+    fn step(&mut self, on: bool, dt: f32) {
+        if on {
+            self.decel = None;
+            self.speed = (self.speed + FLOW_V / 0.8 * dt).min(FLOW_V);
+        } else if self.speed > 0.0 {
+            let decel = *self.decel.get_or_insert_with(|| {
+                let step = 1.0 / DASHES as f32;
+                self.target = ((self.phase + self.speed * 0.5) / step).ceil() * step;
+                self.speed * self.speed / (2.0 * (self.target - self.phase))
+            });
+            self.speed = (self.speed - decel * dt).max(0.0);
+        }
+        self.phase += self.speed * dt;
+        if self.decel.is_some() && (self.speed == 0.0 || self.phase >= self.target) {
+            *self = Flow::default();
+        }
+    }
 }
 
 fn system_turkish() -> bool {
@@ -136,6 +180,10 @@ fn init() -> S {
         jobs: channel(),
         waker: None,
         demo: false,
+        demo_done: 0.0,
+        flow: Flow::default(),
+        flowing: false,
+        flow_min: 0.0,
         cfg,
     }
 }
@@ -182,13 +230,28 @@ impl S {
 
     fn signed_in(&mut self, token: String) {
         let _ = app::set_token(Some(&token));
+        self.list_repos(token);
+    }
+
+    fn list_repos(&mut self, token: String) {
         let busy = self.t("Listing your repos…", "Depoların listeleniyor…");
         self.spawn(busy, move || Job::Signed(repo::user(&token).and_then(|u| repo::repos(&token).map(|r| (u, r)))));
     }
 
+    fn start_flow(&mut self) {
+        self.flowing = true;
+        self.flow_min = self.now + 1.4;
+    }
+
     fn sync_now(&mut self) {
-        let cfg = self.cfg.clone();
+        self.start_flow();
         let busy = self.t("Syncing…", "Senkronlanıyor…");
+        if self.demo {
+            self.busy = busy;
+            self.demo_done = self.now + 2.6;
+            return;
+        }
+        let cfg = self.cfg.clone();
         self.spawn(busy, move || Job::Synced(app::sync_once(&cfg, true)));
     }
 
@@ -225,6 +288,7 @@ impl S {
         }
         self.modal = false;
         self.cfg.save();
+        self.start_flow();
         let pick = self.pick.clone();
         let busy = self.t("Applying: confirm Wave's quit question…", "Uygulanıyor: Wave'in çıkış sorusunu onayla…");
         self.spawn(busy, move || {
@@ -241,7 +305,7 @@ impl S {
             return;
         }
         self.busy.clear();
-        let mut set_err = |r: Result<(), String>, s: &mut S| match r {
+        let set_err = |r: Result<(), String>, s: &mut S| match r {
             Ok(()) => s.err.clear(),
             Err(e) => s.err = e,
         };
@@ -261,7 +325,14 @@ impl S {
                 }),
                 self,
             ),
-            Job::Device(r) => set_err(r.map(|d| self.device = Some(d)), self),
+            Job::Device(r) => match r {
+                Ok(d) => {
+                    let (id, code) = (app::client_id(), d.clone());
+                    self.device = Some(d);
+                    self.spawn(String::new(), move || Job::Token(repo::device_finish(&id, &code)));
+                }
+                Err(e) => self.err = e,
+            },
             Job::Token(r) => {
                 self.device = None;
                 match r {
@@ -279,11 +350,13 @@ impl S {
                 self,
             ),
             Job::Synced(r) => {
+                self.flowing = false;
                 set_err(r.map(|_| ()), self);
                 self.status = Status::load();
                 self.load_profiles();
             }
             Job::Applied(r) => {
+                self.flowing = false;
                 self.cfg = Config::load();
                 self.folder = TextEdit::new(self.cfg.folder.clone());
                 self.status = Status::load();
@@ -312,18 +385,29 @@ fn workspace_counts(db: &std::path::Path) -> [usize; 3] {
 fn setup(s: &mut S, waker: Waker) {
     s.waker = Some(waker);
     s.scan();
-    if let Some(t) = app::token().filter(|_| !s.cfg.guest) {
-        s.signed_in(t);
+    if !s.cfg.guest {
+        // The keychain can ask the user first, so read it off the main thread.
+        s.spawn(String::new(), || match app::token() {
+            Some(t) => Job::Signed(repo::user(&t).and_then(|u| repo::repos(&t).map(|r| (u, r)))),
+            None => Job::Signed(Err(String::new())),
+        });
     }
     s.load_profiles();
 }
 
 fn poll(s: &mut S, now: f64, tx: &mut Tx) -> bool {
-    s.now = now as f32;
+    let now = now as f32;
+    let dt = (now - s.now).clamp(0.0, 0.1);
+    s.now = now;
     while let Ok(job) = s.jobs.1.try_recv() {
         s.land(job);
     }
-    if s.now - s.status_at > 2.0 {
+    if s.demo && s.flowing && s.demo_done > 0.0 && now > s.demo_done {
+        s.flowing = false;
+        s.busy.clear();
+    }
+    s.flow.step(s.flowing || now < s.flow_min, dt);
+    if !s.demo && s.now - s.status_at > 2.0 {
         s.status_at = s.now;
         s.status = Status::load();
     }
@@ -346,33 +430,140 @@ fn caps(s: impl Into<String>, c: Color) -> El {
     text(s.into()).font(style(11.5, 700.0).mono().tracking(1.4)).color(c)
 }
 
+/// The body: a wide, soft tilde. Start point, then (control 1, control 2, end) per cubic.
+const BODY_START: [f32; 2] = [58.0, 140.0];
+const BODY: [[[f32; 2]; 3]; 14] = [
+    [[58.0, 60.0], [80.0, 32.0], [140.0, 30.0]],
+    [[290.0, 24.0], [440.0, 14.0], [530.0, 38.0]],
+    [[610.0, 60.0], [636.0, 118.0], [666.0, 168.0]],
+    [[696.0, 214.0], [740.0, 226.0], [810.0, 220.0]],
+    [[920.0, 210.0], [1020.0, 204.0], [1096.0, 218.0]],
+    [[1136.0, 226.0], [1160.0, 256.0], [1160.0, 300.0]],
+    [[1164.0, 400.0], [1164.0, 520.0], [1158.0, 612.0]],
+    [[1154.0, 666.0], [1120.0, 698.0], [1056.0, 700.0]],
+    [[950.0, 706.0], [850.0, 712.0], [752.0, 694.0]],
+    [[676.0, 680.0], [636.0, 640.0], [608.0, 592.0]],
+    [[580.0, 546.0], [548.0, 530.0], [476.0, 532.0]],
+    [[370.0, 536.0], [250.0, 548.0], [162.0, 538.0]],
+    [[98.0, 532.0], [60.0, 504.0], [56.0, 446.0]],
+    [[50.0, 360.0], [50.0, 230.0], [58.0, 140.0]],
+];
+
 fn body_path() -> Path {
-    Path::new()
-        .move_to([92.0, 40.0])
-        .line_to([500.0, 40.0])
-        .cubic_to([580.0, 40.0], [600.0, 100.0], [630.0, 160.0])
-        .cubic_to([655.0, 210.0], [685.0, 230.0], [745.0, 230.0])
-        .line_to([1112.0, 230.0])
-        .quad_to([1146.0, 230.0], [1146.0, 264.0])
-        .line_to([1146.0, 646.0])
-        .quad_to([1146.0, 680.0], [1112.0, 680.0])
-        .line_to([720.0, 680.0])
-        .cubic_to([640.0, 680.0], [615.0, 630.0], [590.0, 575.0])
-        .cubic_to([570.0, 535.0], [540.0, 520.0], [480.0, 520.0])
-        .line_to([92.0, 520.0])
-        .quad_to([58.0, 520.0], [58.0, 486.0])
-        .line_to([58.0, 74.0])
-        .quad_to([58.0, 40.0], [92.0, 40.0])
-        .close()
+    BODY.iter().fold(Path::new().move_to(BODY_START), |p, [a, b, c]| p.cubic_to(*a, *b, *c)).close()
 }
 
-/// The long curves the speed lines run along, from lower left to upper right.
-fn swift_paths() -> [Path; 4] {
+fn bezier(p0: [f32; 2], [a, b, c]: [[f32; 2]; 3], t: f32) -> [f32; 2] {
+    let u = 1.0 - t;
+    let k = [u * u * u, 3.0 * u * u * t, 3.0 * u * t * t, t * t * t];
     [
-        Path::new().move_to([-20.0, 600.0]).cubic_to([260.0, 600.0], [340.0, 430.0], [600.0, 400.0]).cubic_to([860.0, 370.0], [960.0, 210.0], [1220.0, 200.0]),
-        Path::new().move_to([-20.0, 640.0]).cubic_to([280.0, 640.0], [360.0, 460.0], [600.0, 430.0]).cubic_to([840.0, 400.0], [940.0, 250.0], [1220.0, 236.0]),
-        Path::new().move_to([20.0, 140.0]).cubic_to([120.0, 60.0], [260.0, 40.0], [420.0, 70.0]),
-        Path::new().move_to([760.0, 690.0]).cubic_to([900.0, 720.0], [1050.0, 700.0], [1180.0, 640.0]),
+        k[0] * p0[0] + k[1] * a[0] + k[2] * b[0] + k[3] * c[0],
+        k[0] * p0[1] + k[1] * a[1] + k[2] * b[1] + k[3] * c[1],
+    ]
+}
+
+/// Distance from `p` to the outline, positive inside the body.
+fn depth(poly: &[[f32; 2]], p: [f32; 2]) -> f32 {
+    let (mut inside, mut d) = (false, f32::MAX);
+    for (i, a) in poly.iter().enumerate() {
+        let b = poly[(i + 1) % poly.len()];
+        if (a[1] > p[1]) != (b[1] > p[1]) && p[0] < a[0] + (p[1] - a[1]) / (b[1] - a[1]) * (b[0] - a[0]) {
+            inside = !inside;
+        }
+        let (vx, vy) = (b[0] - a[0], b[1] - a[1]);
+        let t = (((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / (vx * vx + vy * vy).max(1e-6)).clamp(0.0, 1.0);
+        d = d.min((a[0] + vx * t - p[0]).hypot(a[1] + vy * t - p[1]));
+    }
+    if inside { d } else { -d }
+}
+
+const LINES: usize = 15;
+/// Text that sits straight on the body (x0, y0, x1, y1): dashes dim over it.
+const TEXT_ZONES: [[f32; 4]; 4] = [
+    [90.0, 36.0, 440.0, 104.0],
+    [84.0, 470.0, 380.0, 504.0],
+    [750.0, 236.0, 1130.0, 284.0],
+    [680.0, 598.0, 920.0, 634.0],
+];
+const SAMPLES: usize = 180;
+
+/// A curve that follows the tilde from one lobe to the other, sampled, with how deep inside the
+/// body each sample is. Rune has no path clipping, so the lines are cut and faded by this.
+struct FlowLine {
+    pts: Vec<[f32; 2]>,
+    depth: Vec<f32>,
+    inside: Vec<std::ops::Range<usize>>,
+    /// Where the first of the evenly spaced dashes rests (0..1 along the curve), and their length.
+    offset: f32,
+    len: f32,
+    /// Whole number, so a quarter-cycle step moves every dash onto a neighbour's place.
+    speed: f32,
+}
+
+fn hash(n: u32) -> f32 {
+    let mut x = n.wrapping_mul(0x9E37_79B9) ^ 0x85EB_CA6B;
+    x ^= x >> 15;
+    x = x.wrapping_mul(0x2C1B_3C6D);
+    x ^= x >> 12;
+    (x & 0xFFFF) as f32 / 65535.0
+}
+
+fn flow_lines() -> &'static [FlowLine] {
+    static LINES_: std::sync::OnceLock<Vec<FlowLine>> = std::sync::OnceLock::new();
+    LINES_.get_or_init(|| {
+        let mut poly = Vec::new();
+        let mut p0 = BODY_START;
+        for seg in BODY {
+            poly.extend((1..=16).map(|i| bezier(p0, seg, i as f32 / 16.0)));
+            p0 = seg[2];
+        }
+        (0..LINES)
+            .map(|i| {
+                let o = -1.0 + 2.0 * i as f32 / (LINES - 1) as f32;
+                let (y0, y1) = (282.0 + o * 236.0, 458.0 + o * 230.0);
+                let wobble = 5.0 + 6.0 * hash(i as u32 * 7 + 1);
+                let shift = hash(i as u32 * 13 + 5) * std::f32::consts::TAU;
+                let pts: Vec<[f32; 2]> = (0..SAMPLES)
+                    .map(|j| {
+                        let x = -20.0 + 1240.0 * j as f32 / (SAMPLES - 1) as f32;
+                        let t = ((x - 520.0) / 300.0).clamp(0.0, 1.0);
+                        let y = y0 + (y1 - y0) * t * t * (3.0 - 2.0 * t) + wobble * (x / 170.0 + shift).sin();
+                        [x, y]
+                    })
+                    .collect();
+                let depth: Vec<f32> = pts.iter().map(|p| depth(&poly, *p)).collect();
+                let mut inside = Vec::new();
+                let mut from = None;
+                for (j, d) in depth.iter().chain([&-1.0]).enumerate() {
+                    match (from, *d > 6.0) {
+                        (None, true) => from = Some(j),
+                        (Some(a), false) => {
+                            if j - a > 1 {
+                                inside.push(a..j);
+                            }
+                            from = None;
+                        }
+                        _ => {}
+                    }
+                }
+                let (offset, len) = (hash(i as u32 * 61 + 9), 0.028 + 0.022 * hash(i as u32 * 17 + 3));
+                FlowLine { pts, depth, inside, offset, len, speed: if i % 3 == 0 { 2.0 } else { 1.0 } }
+            })
+            .collect()
+    })
+}
+
+fn sample_range(u: f32, len: f32) -> (usize, usize) {
+    let last = (SAMPLES - 1) as f32;
+    ((u * last) as usize, (((u + len) * last) as usize).min(SAMPLES - 1))
+}
+
+/// The long curves outside the body, for the window's silhouette.
+fn swift_paths() -> [Path; 3] {
+    [
+        Path::new().move_to([-20.0, 610.0]).cubic_to([260.0, 610.0], [340.0, 430.0], [600.0, 400.0]).cubic_to([860.0, 370.0], [960.0, 200.0], [1220.0, 190.0]),
+        Path::new().move_to([10.0, 150.0]).cubic_to([90.0, 40.0], [260.0, 8.0], [430.0, 14.0]),
+        Path::new().move_to([760.0, 712.0]).cubic_to([900.0, 728.0], [1060.0, 716.0], [1190.0, 640.0]),
     ]
 }
 
@@ -381,37 +572,71 @@ fn full(shape: Shape) -> El {
 }
 
 /// A dash with a fading tail, `head` running 0 → 1 along the path.
-fn dash(p: &Path, head: f32, len: f32, width: f32, c: Color) -> Vec<El> {
+fn dash(key: &str, p: &Path, head: f32, len: f32, width: f32, c: Color) -> Vec<El> {
     (0..4)
         .map(|i| {
             let hi = head - len * i as f32 / 4.0;
             let lo = hi - len / 4.0;
             let a = c.a * (1.0 - i as f32 * 0.24);
-            full(Shape::new().stroke_path(p, width, LineCap::Round, Color { a, ..c }).trimmed(lo.max(0.0), hi.clamp(0.0, 1.0)))
+            full(Shape::new().stroke_path(p, width, LineCap::Round, Color { a, ..c }).trimmed(lo.max(0.0), hi.clamp(0.0, 1.0))).key(format!("{key}-{i}"))
         })
         .collect()
 }
 
 fn backdrop(s: &S) -> Vec<El> {
+    let env = s.flow.env();
     let paths = swift_paths();
-    let mut out = vec![full(Shape::new().stroke_path(
-        &Path::new().move_to([0.0, 560.0]).cubic_to([260.0, 560.0], [330.0, 410.0], [600.0, 380.0]).cubic_to([870.0, 350.0], [960.0, 190.0], [1200.0, 170.0]),
-        1.0,
-        LineCap::Round,
-        Color { a: 0.35, ..RED },
-    ))];
-    let phase = |period: f32, offset: f32| ((s.now / period + offset) % 1.3) - 0.15;
-    out.extend(dash(&paths[0], phase(3.2, 0.0), 0.2, 3.0, RED2));
-    out.extend(dash(&paths[0], phase(3.2, 0.55), 0.12, 2.0, RED));
-    out.extend(dash(&paths[1], 1.0 - phase(4.4, 0.2), 0.14, 2.0, LILAC));
-    out.extend(dash(&paths[2], phase(2.6, 0.3), 0.35, 2.5, RED2));
-    out.extend(dash(&paths[3], phase(3.8, 0.7), 0.35, 2.0, LILAC));
+    let mut out = Vec::new();
+    let mut quiet = Shape::new();
+    for p in &paths {
+        quiet = quiet.stroke_path(p, 1.0, LineCap::Round, Color { a: 0.3, ..RED });
+    }
+    // Every layer is keyed: the flow adds and removes layers, and unkeyed siblings would trade
+    // places (and blur) with each other.
+    out.push(full(quiet).key("quiet"));
+    {
+        for (i, p) in paths.iter().enumerate() {
+            let head = (s.flow.phase * 1.6 + 0.35 * i as f32).rem_euclid(1.3) - 0.15;
+            out.extend(dash(&format!("swift-{i}"), p, head, 0.24, 2.5, Color { a: env, ..if i == 1 { LILAC } else { RED2 } }));
+        }
+    }
     let body = body_path();
-    out.push(full(Shape::new().fill_path(&body, BG)).window_drag());
-    out.push(full(Shape::new().stroke_path(&body, 2.0, LineCap::Round, EDGE)));
-    out.push(full(Shape::new().line([70.0, 96.0], [70.0, 496.0], 4.0, LineCap::Round, RED)));
-    out.push(full(Shape::new().line([1134.0, 290.0], [1134.0, 640.0], 4.0, LineCap::Round, VIOLET)));
-    out.extend(dash(&paths[1], phase(5.0, 0.4), 0.1, 1.5, Color { a: 0.8, ..LILAC }));
+    out.push(full(Shape::new().fill_path(&body, BG)).window_drag().key("body"));
+
+    // Texture: every flow line, faint, where it is inside; then the neon dashes on top.
+    let (mut faint, mut glow, mut core) = (Shape::new(), Shape::new(), Shape::new());
+    for (i, l) in flow_lines().iter().enumerate() {
+        let tint = if i % 4 == 1 { LILAC } else { RED2 };
+        for r in &l.inside {
+            faint = faint.stroke(l.pts[r.clone()].to_vec(), 1.0, Color { a: 0.06 + 0.06 * env, ..tint });
+        }
+        for j in 0..DASHES {
+            let u = (l.offset + j as f32 / DASHES as f32 + l.speed * s.flow.phase).rem_euclid(1.0);
+            let (a, b) = sample_range(u, l.len);
+            if b <= a + 1 {
+                continue;
+            }
+            let pts = l.pts[a..=b].to_vec();
+            let on_text = pts.iter().any(|p| TEXT_ZONES.iter().any(|z| p[0] > z[0] && p[0] < z[2] && p[1] > z[1] && p[1] < z[3]));
+            let edge = ((l.depth[a..=b].iter().copied().fold(f32::MAX, f32::min) - 2.0) / 28.0).clamp(0.0, 1.0);
+            let fade = edge * if on_text { 0.15 } else { 1.0 };
+            if fade == 0.0 {
+                continue;
+            }
+            glow = glow.stroke(pts.clone(), 7.0, Color { a: (0.2 + 0.45 * env) * fade, ..tint });
+            core = core.stroke(pts, 1.6, Color { a: (0.42 + 0.5 * env) * fade, ..tint });
+        }
+    }
+    out.push(full(faint).key("faint"));
+    out.push(full(glow).blur(6.0).key("glow"));
+    out.push(full(core).blur(0.6).key("core"));
+
+    out.push(full(Shape::new().stroke_path(&body, 2.0, LineCap::Round, EDGE)).key("edge"));
+    // The outline lights up while the lines run. Always in the tree, faded by `env`.
+    out.push(full(Shape::new().stroke_path(&body, 3.0, LineCap::Round, Color { a: 0.24 * env, ..RED2 })).blur(9.0).key("outline-glow"));
+    out.push(full(Shape::new().stroke_path(&body, 1.0, LineCap::Round, Color { a: 0.55 * env, ..RED2 })).key("outline-line"));
+    out.push(full(Shape::new().line([70.0, 160.0], [70.0, 430.0], 4.0, LineCap::Round, RED)).key("accent-l"));
+    out.push(full(Shape::new().line([1144.0, 320.0], [1144.0, 600.0], 4.0, LineCap::Round, VIOLET)).key("accent-r"));
     out
 }
 
@@ -726,18 +951,13 @@ fn right_lobe(s: &S) -> El {
     c
 }
 
+fn hx(hex: &str) -> Color {
+    rune::color::hex(hex).unwrap_or(RED)
+}
+
 fn orb(s: &S) -> Vec<El> {
-    let (cx, cy, r) = (607.0, 372.0, 86.0);
-    let spin = s.now * if s.busy.is_empty() { 0.45 } else { 2.4 };
-    let mut ring = Shape::new();
-    for i in 0..28 {
-        let a0 = i as f32 / 28.0 * std::f32::consts::TAU + spin;
-        let pts: Vec<[f32; 2]> = (0..4).map(|j| {
-            let a = a0 + j as f32 * 0.045;
-            [cx + a.cos() * r, cy + a.sin() * r]
-        }).collect();
-        ring = ring.stroke(pts, 2.0, Color { a: 0.85, ..VIOLET });
-    }
+    let (cx, cy) = (607.0, 372.0);
+    let env = s.flow.env();
     let (big, small) = if !s.busy.is_empty() {
         ("···".to_string(), String::new())
     } else if s.cfg.setup_done {
@@ -745,10 +965,32 @@ fn orb(s: &S) -> Vec<El> {
     } else {
         ("START".to_string(), format!("{}/3", s.step))
     };
+    let white = |a: f32| Color { a, ..INK };
+    // A soft light band crosses the button every six seconds.
+    let p = (s.now % 6.0) / 1.6 * 1.3 - 0.15;
+    let sheen_a = if (0.0..=1.0).contains(&p) { 0.26 * (std::f32::consts::PI * p).sin() } else { 0.0 };
+    let sheen = el().absolute(0.0, 0.0).size(128.0, 128.0).radius(64.0).linear_gradient(
+        2.3,
+        [(0.0, white(0.0)), ((p - 0.16).clamp(0.0, 1.0), white(0.0)), (p.clamp(0.0, 1.0), white(sheen_a)), ((p + 0.16).clamp(0.0, 1.0), white(0.0)), (1.0, white(0.0))],
+    );
+    let specular = el().absolute(0.0, 0.0).size(128.0, 128.0).radius(64.0)
+        .radial_gradient([0.34, 0.24], 60.0, [(0.0, white(0.4)), (0.5, white(0.08)), (1.0, white(0.0))]);
     vec![
-        full(ring),
-        col().absolute(cx - 64.0, cy - 64.0).size(128.0, 128.0).radius(64.0).center()
-            .fill(RED).border(2.0, RED2).shadow(0.0, 46.0, Color { a: 0.55, ..RED }).cursor(Cursor::Pointer)
+        el().key("bloom").absolute(cx - 92.0, cy - 92.0).size(184.0, 184.0).radius(92.0).fill(Color { a: 0.3 + 0.35 * env, ..RED }).blur(30.0),
+        col().key("orb").absolute(cx - 64.0, cy - 64.0).size(128.0, 128.0).radius(64.0).center()
+            .fill(RED)
+            .linear_gradient(std::f32::consts::PI, [
+                (0.0, hx("#ff5d78")),
+                (0.4, hx("#d90f34")),
+                (0.5, hx("#b30a28")),
+                (0.8, hx("#88061d")),
+                (1.0, hx("#5a0313")),
+            ])
+            .border_gradient(1.5, hx("#ffb7c4"), hx("#4a0210"))
+            .shadow(12.0, 36.0, Color { a: 0.5, ..RED })
+            .cursor(Cursor::Pointer)
+            .child(specular)
+            .child(sheen)
             .child(label(big, 17.0, 800.0, INK))
             .child(mono(small, 9.5, INK))
             .on_press(|s: &mut S| {
@@ -877,7 +1119,7 @@ fn view(s: &S, _: &mut Cx<S>) -> El {
     let k = kit();
     let mut root = el().key("root").size(W, H).children(backdrop(s));
     root = root
-        .child(row().absolute(92.0, 58.0).gap(12.0).center_y().window_drag()
+        .child(row().absolute(102.0, 52.0).gap(12.0).center_y().window_drag()
             .child(row().child(label("Wavy", 30.0, 800.0, INK)).child(label("~", 30.0, 800.0, RED)).child(label("Sync", 30.0, 800.0, INK)))
             .child(mono(format!("WVYSY · v{}", env!("CARGO_PKG_VERSION")), 11.0, MUTED)))
         .child(mono(format!("SYNC.{} // PROFILES.{} // GIT.{}", if s.cfg.auto { "LIVE" } else { "HOLD" }, s.profiles.len(),
@@ -941,6 +1183,7 @@ pub fn run() {
             ("tour", |s| { demo(s); s.cfg.setup_done = false; s.step = 1; s.ext_open = false; }),
             ("apply", |s| { demo(s); s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
             ("live", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; }),
+            ("flow", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.flowing = true; s.flow.speed = FLOW_V; s.flow.phase = 0.37; s.busy = "Syncing…".into(); }),
             ("tr", |s| { demo(s); s.tr = true; s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
         ],
         ..AppSpec::new("WavySync", (W, H), init, view)
