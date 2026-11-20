@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog · WavySync</title>
+<meta name="description" content="What changed in each WavySync release.">
+<meta property="og:title" content="Changelog · WavySync">
+<meta property="og:description" content="What changed in each WavySync release.">
+<meta property="og:image" content="https://wavysync.vercel.app/main.png">
+<meta name="theme-color" content="#120d19">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">How it works</a>
+      <a href="../features/" data-i="nav.features">Features</a>
+      <a href="../docs/" data-i="nav.docs">Docs</a>
+      <a href="../changelog/" class="opt on" data-i="nav.changelog">Changelog</a>
+      <a href="../download/" data-i="nav.download">Download</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">TR</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="cl.k">Changelog</span>
+    <h1 data-i="cl.h">What's <em>new</em></h1>
+    <p class="sub" data-i="cl.p">Every release, newest first. Downloads are on GitHub Releases.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="release reveal">
+      <h2><a href="https://github.com/Ege-BULUT/WavySync/releases/tag/v0.1.0" style="text-decoration:none">v0.1.0</a></h2>
+      <div class="date">2026-11-20 · <span data-i="cl.first">First release</span></div>
+      <ul data-l="en">
+        <li>Three step setup: what to sync, the repo, this computer's folder.</li>
+        <li>Push and Pull buttons, with the background lines flowing right for Push and left for Pull, and a SYNCED notice when they land.</li>
+        <li>Live sync switch with Live settings: settings, widgets, themes, connections and AI modes go live; workspaces, tabs and layouts wait for Push, with a rate limit warning if you turn them on.</li>
+        <li>Profiles: one folder per computer, apply any of them, choose where future changes go, with a backup first.</li>
+        <li>Widgets bring their tools: git repos and build steps, Homebrew, npm, cargo and small scripts are found and installed.</li>
+        <li>GitHub sign in with a device code, or guest mode on a public repo with this computer's git login.</li>
+        <li>Secrets stripped before anything leaves; the home folder is stored as <code>{HOME}</code>.</li>
+        <li>Command line: <code>--sync</code>, <code>--pull</code>, <code>--profiles</code>, <code>--apply</code>, <code>--detect</code>, <code>--setup</code>.</li>
+        <li>Builds for macOS (Apple silicon and Intel), Windows and Linux.</li>
+      </ul>
+      <ul data-l="tr">
+        <li>Üç adımlı kurulum: ne senkronlansın, depo, bu bilgisayarın klasörü.</li>
+        <li>Push ve Pull butonları: Push'ta arka plan çizgileri sağa, Pull'da sola akar; iş bitince SYNCED bildirimi çıkar.</li>
+        <li>Canlı senkron anahtarı ve Canlı ayarlar: ayarlar, widget'lar, temalar, bağlantılar ve AI modları canlı gider; çalışma alanları, sekmeler ve düzenler Push'u bekler, açmak istersen hız limiti uyarısı çıkar.</li>
+        <li>Profiller: her bilgisayara bir klasör, herhangi birini uygula, değişikliklerin nereye gideceğini seç; önce yedek alınır.</li>
+        <li>Widget'lar araçlarıyla gelir: git depoları ve derleme adımları, Homebrew, npm, cargo ve küçük betikler bulunur ve kurulur.</li>
+        <li>Cihaz koduyla GitHub girişi ya da bu bilgisayarın git girişiyle public bir depoda misafir modu.</li>
+        <li>Bir şey çıkmadan önce gizli bilgiler ayıklanır; ev klasörü <code>{HOME}</code> olarak saklanır.</li>
+        <li>Komut satırı: <code>--sync</code>, <code>--pull</code>, <code>--profiles</code>, <code>--apply</code>, <code>--detect</code>, <code>--setup</code>.</li>
+        <li>macOS (Apple silicon ve Intel), Windows ve Linux için derlemeler.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal is a separate project, not affiliated with WavySync.</span>
+  </div>
+</footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features · WavySync</title>
+<meta name="description" content="What WavySync does: Push, Pull and live sync for Wave Terminal, widgets with their tools, one folder per computer.">
+<meta property="og:title" content="Features · WavySync">
+<meta property="og:description" content="What WavySync does: Push, Pull and live sync for Wave Terminal, widgets with their tools, one folder per computer.">
+<meta property="og:image" content="https://wavysync.vercel.app/main.png">
+<meta name="theme-color" content="#120d19">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">How it works</a>
+      <a href="../features/" class="on" data-i="nav.features">Features</a>
+      <a href="../docs/" data-i="nav.docs">Docs</a>
+      <a href="../changelog/" class="opt" data-i="nav.changelog">Changelog</a>
+      <a href="../download/" data-i="nav.download">Download</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">TR</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="f.k">Features</span>
+    <h1 data-i="ft.h">Everything <em>Wavy~Sync</em> does</h1>
+    <p class="sub" data-i="ft.p">One small Rust app that keeps Wave Terminal the same on every computer you use.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="frow reveal">
+      <div><span class="caps">PUSH · PULL</span><h3 data-i="ft.pp.h">Push and Pull</h3><p data-i="ft.pp.p">Push sends this Wave to its folder in the repo, layouts included, and the lines in the window flow to the right. Pull brings the folder back into Wave and the lines flow to the left. When either one lands, a green SYNCED shows for a moment. Pull closes Wave only when the layouts actually differ.</p></div>
+      <img src="../main.png" width="2400" height="1440" alt="Push and Pull" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">LIVE</span><h3 data-i="ft.live.h">Live sync, without the noise</h3><p data-i="ft.live.p">Turn the live sync switch on and a background process sends settings, widgets, themes and connections as they change. Workspaces, tabs and layouts change with every pane you move, so they wait for Push unless you turn them on in Live settings, and WavySync warns you about GitHub's rate limits before you do.</p></div>
+      <img src="../live.png" width="2400" height="1440" alt="Live sync, without the noise" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">WIDGETS</span><h3 data-i="ft.w.h">Widgets bring their tools</h3><p data-i="ft.w.p">WavySync reads each widget and finds what it runs: a git repo and its build steps, a Homebrew formula, a global npm package, a <code>cargo install</code>, or a small script it carries along. Applying a profile installs them on the other computer.</p></div>
+      <img src="../sync.png" width="2400" height="1440" alt="Widgets bring their tools" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">PROFILES</span><h3 data-i="ft.prof.h">One folder per computer, any profile anywhere</h3><p data-i="ft.prof.p">Each computer saves to its own folder, named after the computer, and you can rename it. Apply another computer's profile and choose where your future changes go: your own folder, the profile you applied, or a new one. Your current Wave is backed up first.</p></div>
+      <img src="../apply.png" width="2400" height="1440" alt="One folder per computer, any profile anywhere" loading="lazy">
+    </div>
+    <div class="frow reveal">
+      <div><span class="caps">REPO</span><h3 data-i="ft.repo.h">Your repo, private or public</h3><p data-i="ft.repo.p">Sign in with GitHub to pick or create a private repo, or use a public repo as a guest with this computer's own git login. Keys, tokens and passwords are stripped before anything leaves, and your home folder is stored as <code>{HOME}</code> so paths work under another user name.</p></div>
+      <img src="../repo.png" width="2400" height="1440" alt="Your repo, private or public" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="caps" data-i="ft.gk">At a glance</span>
+    <h2 data-i="f.h">Sync Options</h2>
+    <div class="grid">
+      <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Layouts come across whole</h3><p data-i="f1.p">Workspaces, tabs, blocks and how you split them, read straight from Wave's database.</p></div>
+      <div class="card reveal"><span class="k">WIDGETS</span><h3 data-i="f2.h">Widgets with their tools</h3><p data-i="f2.p">Git repos and build steps, Homebrew, npm, cargo, or the small script a widget runs.</p></div>
+      <div class="card reveal"><span class="k">PROFILES</span><h3 data-i="f3.h">One folder per computer</h3><p data-i="f3.p">Named after the computer by default. Rename it, apply another, or start a new one.</p></div>
+      <div class="card reveal"><span class="k">PUSH · PULL · LIVE</span><h3 data-i="f4.h">Push, Pull, or live</h3><p data-i="f4.p">Push sends everything when you say so; Pull brings it back. Live sync sends settings and widgets as they change, and layouts wait for Push.</p></div>
+      <div class="card reveal"><span class="k">PRIVATE</span><h3 data-i="f5.h">Secrets stay home</h3><p data-i="f5.p">Tokens, keys and passwords are stripped. Your home folder becomes {HOME}.</p></div>
+      <div class="card reveal"><span class="k">NATIVE</span><h3 data-i="f6.h">Small Rust app</h3><p data-i="f6.p">One binary for macOS, Windows and Linux, drawn with Rune, plus a widget in Wave's sidebar.</p></div>
+    </div>
+    <div style="margin-top:26px"><div class="never reveal">
+      <h3 data-i="n.h">Never leaves your computer</h3>
+      <ul>
+        <li data-i="n.1">Keys named like <code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code></li>
+        <li data-i="n.2">Terminal history and scrollback</li>
+        <li data-i="n.3">Your GitHub sign in: it stays in the system keychain</li>
+        <li data-i="n.4">Anything you leave unticked</li>
+      </ul>
+    </div></div>
+    <a class="more" href="../download/" data-i="more.dl">Download page →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal is a separate project, not affiliated with WavySync.</span>
+  </div>
+</footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

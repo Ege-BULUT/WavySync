@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is WaveTerm? · WavySync</title>
+<meta name="description" content="Wave Terminal, in its own words: the open-source, AI-integrated terminal that WavySync keeps in sync.">
+<meta property="og:title" content="What is WaveTerm? · WavySync">
+<meta property="og:description" content="Wave Terminal, in its own words: the open-source, AI-integrated terminal that WavySync keeps in sync.">
+<meta property="og:image" content="https://wavysync.vercel.app/main.png">
+<meta name="theme-color" content="#120d19">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" class="on" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">How it works</a>
+      <a href="../features/" data-i="nav.features">Features</a>
+      <a href="../docs/" data-i="nav.docs">Docs</a>
+      <a href="../changelog/" class="opt" data-i="nav.changelog">Changelog</a>
+      <a href="../download/" data-i="nav.download">Download</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">TR</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="wt.k">Wave Terminal</span>
+    <h1 data-i="wt.h">What is <em>WaveTerm</em>?</h1>
+    <p class="sub" data-i="wt.p">WavySync keeps Wave Terminal the same on every computer. Here is what Wave is, in its own words.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+  <blockquote class="src">
+    <p>Wave is an open-source, AI-integrated terminal for macOS, Linux, and Windows. It works with any AI model. Bring your own API keys for OpenAI, Claude, or Gemini, or run local models via Ollama and LM Studio. No accounts required.</p>
+    <p>Wave also supports durable SSH sessions that survive network interruptions and restarts, with automatic reconnection. Edit remote files with a built-in graphical editor and preview files inline without leaving the terminal.</p>
+    <cite>Wave Terminal README · github.com/wavetermdev/waveterm</cite>
+  </blockquote>
+  <blockquote class="src">
+    <p>Wave is an open-source terminal with superpowers, integrating file previews, file editing, AI, web browsing, and workspace organization.</p>
+    <cite>waveterm.dev</cite>
+  </blockquote>
+  <div class="linkrow">
+    <a class="btn red" href="https://github.com/wavetermdev/waveterm/releases/latest" data-i="wt.dl">Download the latest stable release</a>
+    <a class="btn" href="https://www.waveterm.dev">waveterm.dev</a>
+    <a class="btn" href="https://github.com/wavetermdev/waveterm">GitHub</a>
+    <a class="btn" href="https://docs.waveterm.dev" data-i="wt.docs">Documentation</a>
+  </div>
+  <p class="rel"><span data-i="wt.latest">Latest stable release:</span> <a data-wave-rel href="https://github.com/wavetermdev/waveterm/releases/tag/v0.14.5">v0.14.5</a> · <span data-wave-date>2026-04-16</span> · macOS · Windows · Linux</p>
+  <figure class="wt-shot"><img src="img/wave.webp" width="3680" height="2382" alt="Wave Terminal with terminals, a web view, file preview and Wave AI" loading="lazy"></figure>
+
+  <h3 class="sec" data-i="wt.fh">Features</h3>
+  <p class="rel" data-i="wt.note">In Wave's own words, from waveterm.dev and the Wave Terminal README.</p>
+  <div class="wt-feats">
+    <figure><img src="img/layouts.jpg" width="1633" height="935" alt="Screen Splitting and Layouts" loading="lazy"><figcaption><b>Screen Splitting and Layouts</b>Split screens and arrange terminals, editors, and web views into workspaces and dashboards</figcaption></figure>
+    <figure><img src="img/connections.png" width="1316" height="1038" alt="Manage Remote Machines" loading="lazy"><figcaption><b>Manage Remote Machines</b>Quickly switch between remote servers and clusters with our SSH connection manager (with WSL support)</figcaption></figure>
+    <figure><img src="img/files.webp" width="3456" height="2160" alt="Work with Remote Files" loading="lazy"><figcaption><b>Work with Remote Files</b>Navigate directories, preview markdown and images, and manage files on remote machines</figcaption></figure>
+    <figure><img src="img/browser.webp" width="3456" height="2160" alt="Inline Web Browser" loading="lazy"><figcaption><b>Inline Web Browser</b>Built-in web browser to access Github, StackOverflow, dashboards, and your own apps</figcaption></figure>
+  </div>
+
+  <h3 class="sec" data-i="wt.kh">Key Features</h3>
+  <ul class="keyf">
+    <li>Wave AI - Context-aware terminal assistant that reads your terminal output, analyzes widgets, and performs file operations</li>
+    <li>Durable SSH Sessions - Remote terminal sessions survive connection interruptions, network changes, and Wave restarts with automatic reconnection</li>
+    <li>Flexible drag &amp; drop interface to organize terminal blocks, editors, web browsers, and AI assistants</li>
+    <li>Built-in editor for editing remote files with syntax highlighting and modern editor features</li>
+    <li>Rich file preview system for remote files (markdown, images, video, PDFs, CSVs, directories)</li>
+    <li>Quick full-screen toggle for any block - expand terminals, editors, and previews for better visibility, then instantly return to multi-block view</li>
+    <li>AI chat widget with support for multiple models (OpenAI, Claude, Azure, Perplexity, Ollama)</li>
+    <li>Command Blocks for isolating and monitoring individual commands</li>
+    <li>One-click remote connections with full terminal and file system access</li>
+    <li>Secure secret storage using native system backends - store API keys and credentials locally, access them across SSH sessions</li>
+    <li>Rich customization including tab themes, terminal styles, and background images</li>
+    <li>Powerful <code>wsh</code> command system for managing your workspace from the CLI and sharing data between terminal sessions</li>
+    <li>Connected file management with <code>wsh file</code> - seamlessly copy and sync files between local and remote SSH hosts</li>
+  </ul>
+  <p class="rel" data-i="wt.lic">Text and screenshots from Wave Terminal by Command Line Inc., Apache License 2.0. WavySync is not affiliated with Wave Terminal.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal is a separate project, not affiliated with WavySync.</span>
+  </div>
+</footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

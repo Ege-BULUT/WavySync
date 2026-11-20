@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download · WavySync</title>
+<meta name="description" content="Download WavySync for macOS, Windows and Linux, or build it from source.">
+<meta property="og:title" content="Download · WavySync">
+<meta property="og:description" content="Download WavySync for macOS, Windows and Linux, or build it from source.">
+<meta property="og:image" content="https://wavysync.vercel.app/main.png">
+<meta name="theme-color" content="#120d19">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="../waveterm/" data-i="nav.wt">WaveTerm</a>
+      <a href="../#how" class="opt" data-i="nav.how">How it works</a>
+      <a href="../features/" data-i="nav.features">Features</a>
+      <a href="../docs/" data-i="nav.docs">Docs</a>
+      <a href="../changelog/" class="opt" data-i="nav.changelog">Changelog</a>
+      <a href="../download/" class="on" data-i="nav.download">Download</a>
+      <a href="https://github.com/Ege-BULUT/WavySync" class="opt">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">TR</button>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="caps" data-i="dl.k">Download</span>
+    <h1 data-i="dl.h">Get <em>Wavy~Sync</em>.</h1>
+    <p class="sub" data-i="dp.p">One file per system. Run it and the three step setup opens.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="rel"><span data-i="dp.ver">Latest release:</span> <a data-ws-rel href="https://github.com/Ege-BULUT/WavySync/releases/tag/v0.1.0">v0.1.0</a> · <a href="../changelog/" data-i="nav.changelog">Changelog</a> · <a href="https://github.com/Ege-BULUT/WavySync/releases" data-i="dp.all">All releases</a></p>
+    <div class="dl">
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-arm64.tar.gz"><b>macOS</b><span>Apple silicon</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-x64.tar.gz"><b>macOS</b><span>Intel</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-windows-x64.exe"><b>Windows</b><span>x64</span><i>.exe ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-linux-x64.tar.gz"><b>Linux</b><span>x64</span><i>.tar.gz ↓</i></a>
+    </div>
+    <div class="prose" style="margin-top:44px">
+      <div data-l="en">
+        <h2>Before you start</h2>
+        <ul>
+          <li><code>git</code> must be on your <code>PATH</code>.</li>
+          <li>Wave Terminal does not have to be installed when you apply a profile; WavySync writes the files where Wave will read them. Get Wave from <a href="https://github.com/wavetermdev/waveterm/releases/latest">its latest release</a> or <a href="https://www.waveterm.dev/download">waveterm.dev/download</a>.</li>
+          <li>The binaries are not signed yet.</li>
+        </ul>
+        <h2>macOS</h2>
+        <pre><code>tar -xzf wavysync-macos-arm64.tar.gz     # or wavysync-macos-x64.tar.gz on Intel
+xattr -d com.apple.quarantine ./wavysync
+./wavysync</code></pre>
+        <h2>Windows</h2>
+        <p>Run <code>wavysync-windows-x64.exe</code>. SmartScreen may warn about an unknown publisher: choose <b>More info</b>, then <b>Run anyway</b>.</p>
+        <h2>Linux</h2>
+        <pre><code>tar -xzf wavysync-linux-x64.tar.gz
+./wavysync</code></pre>
+        <h2>Build from source</h2>
+        <p>Current stable Rust; on Linux also <code>libxkbcommon-dev</code> and <code>libwayland-dev</code>.</p>
+        <pre><code>git clone https://github.com/Ege-BULUT/WavySync
+cd WavySync
+cargo build --release
+./target/release/wavysync</code></pre>
+      </div>
+      <div data-l="tr">
+        <h2>Başlamadan önce</h2>
+        <ul>
+          <li><code>git</code> <code>PATH</code> üzerinde olmalı.</li>
+          <li>Profil uygularken Wave Terminal'in kurulu olması gerekmez; WavySync dosyaları Wave'in okuyacağı yere yazar. Wave'i <a href="https://github.com/wavetermdev/waveterm/releases/latest">son sürümünden</a> ya da <a href="https://www.waveterm.dev/download">waveterm.dev/download</a> adresinden indirebilirsin.</li>
+          <li>Dosyalar henüz imzalı değil.</li>
+        </ul>
+        <h2>macOS</h2>
+        <pre><code>tar -xzf wavysync-macos-arm64.tar.gz     # Intel'de wavysync-macos-x64.tar.gz
+xattr -d com.apple.quarantine ./wavysync
+./wavysync</code></pre>
+        <h2>Windows</h2>
+        <p><code>wavysync-windows-x64.exe</code> dosyasını çalıştır. SmartScreen bilinmeyen yayıncı uyarısı verirse <b>Ek bilgi</b>, sonra <b>Yine de çalıştır</b> de.</p>
+        <h2>Linux</h2>
+        <pre><code>tar -xzf wavysync-linux-x64.tar.gz
+./wavysync</code></pre>
+        <h2>Kaynaktan derle</h2>
+        <p>Güncel kararlı Rust; Linux'ta ayrıca <code>libxkbcommon-dev</code> ve <code>libwayland-dev</code>.</p>
+        <pre><code>git clone https://github.com/Ege-BULUT/WavySync
+cd WavySync
+cargo build --release
+./target/release/wavysync</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal is a separate project, not affiliated with WavySync.</span>
+  </div>
+</footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

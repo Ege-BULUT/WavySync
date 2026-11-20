@@ -53,6 +53,9 @@ textarea:disabled, input:disabled { opacity: .45; }
 <div class="stage">
   <div class="bar">
     <span class="t">Wavy<b>~</b>Sync site düzenleyici</span>
+    <select id="pg" aria-label="Sayfa" style="background:var(--panel2,#2a2039);color:inherit;border:1px solid var(--edge,#3a2d4f);border-radius:8px;padding:6px 8px;font:inherit">
+      <option value="index.html">Ana sayfa</option><option value="waveterm/">WaveTerm</option><option value="features/">Features</option><option value="download/">Download</option><option value="docs/">Docs</option><option value="changelog/">Changelog</option>
+    </select>
     <div class="seg" id="size"><button data-w="100%" class="on">Masaüstü</button><button data-w="820px">Tablet</button><button data-w="390px">Telefon</button></div>
     <div class="seg" id="lang"><button data-l="en">EN</button><button data-l="tr">TR</button></div>
     <div class="seg" id="motion"><button data-m="0" class="on">Hareket durdu</button><button data-m="1">Hareket açık</button></div>
@@ -158,9 +161,9 @@ function select(el) {
   // The page's own TR/EN button can switch the language behind the editor's back.
   lang = doc.documentElement.lang === "tr" ? "tr" : "en";
   document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
-  const key = pathOf(el), scope = key.startsWith("i:") ? lang : "*", id = scope + "|" + key;
+  const key = pathOf(el), scope = key.startsWith("i:") ? lang : "*", page = pageOf(), id = page + "|" + scope + "|" + key;
   const kind = kindOf(el);
-  const e = edits[id] || { key, scope, kind, label: label(el), before: get(el, kind), after: null, note: "" };
+  const e = edits[id] || { page, key, scope, kind, label: label(el), before: get(el, kind), after: null, note: "" };
   sel = { el, id, e };
   el.classList.remove("ed-hover");
   el.classList.add("ed-sel");
@@ -192,10 +195,14 @@ function record() {
   renderList();
 }
 
+// Which site page the preview shows, relative to site/ ("index.html", "docs/", ...).
+function pageOf() { return (f.contentWindow.location.pathname.replace(/^\/site\//, "") || "index.html"); }
+
 function applyEdits() {
   doc.querySelectorAll(".ed-done").forEach(x => x.classList.remove("ed-done"));
   for (const e of Object.values(edits)) {
     if (e.scope !== "*" && e.scope !== lang) continue;
+    if ((e.page || "index.html") !== pageOf()) continue;
     const el = find(e.key);
     if (!el) continue;
     if (e.after !== null) put(el, e.kind, e.after);
@@ -226,10 +233,12 @@ function renderList() {
     const d = document.createElement("div");
     d.className = "item";
     const add = (cls, text) => { const x = document.createElement("div"); x.className = cls; x.textContent = text; d.append(x); };
-    add("k", `${e.label} · ${e.scope === "*" ? "TR+EN" : e.scope.toUpperCase()}`);
+    add("k", `${(e.page || "index.html").replace("index.html", "ana sayfa")} · ${e.label} · ${e.scope === "*" ? "TR+EN" : e.scope.toUpperCase()}`);
     if (e.after !== null) { add("a", plain(e.before).slice(0, 160)); add("b", plain(e.after).slice(0, 160)); }
     if (e.note) add("n", "Not: " + e.note);
     d.onclick = () => {
+      const pg = e.page || "index.html";
+      if (pg !== pageOf()) { $("pg").value = pg; f.src = "/site/" + pg; return; }
       if (e.scope !== "*" && e.scope !== lang) setLang(e.scope);
       const el = find(e.key);
       if (el) { el.scrollIntoView({ block: "center" }); select(el); }
@@ -245,7 +254,8 @@ const loaded = fetch("/tools/site-edits.json", { cache: "no-store" })
     $("general").value = d.general_note || "";
     for (const x of d.edits || []) {
       const scope = x.lang === "both" ? "*" : x.lang;
-      edits[scope + "|" + x.key] = { key: x.key, scope, kind: x.kind, label: x.element, before: x.before, after: x.after, note: x.note || "" };
+      const page = (x.page || "site/index.html").replace(/^site\//, "");
+      edits[page + "|" + scope + "|" + x.key] = { page, key: x.key, scope, kind: x.kind, label: x.element, before: x.before, after: x.after, note: x.note || "" };
     }
   })
   .catch(() => {});
@@ -253,6 +263,7 @@ const loaded = fetch("/tools/site-edits.json", { cache: "no-store" })
 f.addEventListener("load", async () => {
   await loaded;
   doc = f.contentDocument; win = f.contentWindow;
+  if ([...$("pg").options].some(o => o.value === pageOf())) $("pg").value = pageOf();
   const st = doc.createElement("style"); st.textContent = ED_CSS; doc.head.append(st);
   doc.querySelectorAll(".reveal").forEach(x => x.classList.add("in"));
   lang = doc.documentElement.lang === "tr" ? "tr" : "en";
@@ -294,6 +305,7 @@ $("revert").onclick = () => {
 };
 $("done").onclick = clearSel;
 document.querySelectorAll("#lang button").forEach(b => b.onclick = () => setLang(b.dataset.l));
+$("pg").onchange = () => { clearSel(); f.src = "/site/" + $("pg").value; };
 document.querySelectorAll("#motion button").forEach(b => b.onclick = () => setMotion(b.dataset.m === "1"));
 document.querySelectorAll("#size button").forEach(b => b.onclick = () => {
   f.style.width = b.dataset.w;
@@ -303,9 +315,8 @@ document.querySelectorAll("#size button").forEach(b => b.onclick = () => {
 $("save").onclick = async () => {
   record();
   const body = {
-    page: "site/index.html",
     general_note: $("general").value.trim(),
-    edits: Object.values(edits).map(e => ({ key: e.key, lang: e.scope === "*" ? "both" : e.scope, element: e.label, kind: e.kind, before: e.before, after: e.after, note: e.note })),
+    edits: Object.values(edits).map(e => ({ page: "site/" + (e.page || "index.html"), key: e.key, lang: e.scope === "*" ? "both" : e.scope, element: e.label, kind: e.kind, before: e.before, after: e.after, note: e.note })),
   };
   try {
     const r = await fetch("/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
