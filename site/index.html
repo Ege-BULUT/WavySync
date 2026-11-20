@@ -56,7 +56,8 @@ nav .links a:hover { color: var(--ink); }
 .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
 .logo { width: 100%; max-width: 640px; display: block; filter: drop-shadow(0 30px 60px rgba(207, 10, 44, .18)); border-radius: 20px; }
 h1 { font: 800 clamp(36px, 5vw, 62px)/1.04 var(--sans); letter-spacing: -.035em; margin: 34px 0 18px; }
-h1 em { font-style: normal; background: linear-gradient(90deg, var(--red2), var(--lilac)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+h1 em, h2 em { font-style: normal; background: linear-gradient(90deg, var(--red2), var(--lilac), var(--red2)) 0 0 / 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shift 6s linear infinite; }
+@keyframes shift { to { background-position: -200% 0; } }
 .lead { font-size: 18px; color: var(--soft); max-width: 560px; margin: 0 0 28px; }
 .cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .shot { position: relative; transform: perspective(1400px) rotateY(-9deg) rotateX(4deg); animation: float 7s ease-in-out infinite; }
@@ -69,6 +70,7 @@ h1 em { font-style: normal; background: linear-gradient(90deg, var(--red2), var(
 section { padding: 90px 0; position: relative; }
 h2 { font: 800 clamp(30px, 3.6vw, 44px)/1.1 var(--sans); letter-spacing: -.03em; margin: 12px 0 14px; }
 .sub { color: var(--soft); max-width: 640px; margin: 0 0 40px; font-size: 17px; }
+h2:not(:has(+ .sub)) { margin-bottom: 40px; }
 .divider { display: block; width: 100%; height: 70px; }
 .divider path { fill: none; stroke: var(--edge); stroke-width: 1.5; }
 .divider .run { stroke: var(--red2); stroke-width: 2.5; stroke-dasharray: 140 3000; animation: flow 5s linear infinite; }
@@ -210,13 +212,13 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
   <div class="wrap hero-grid">
     <div>
       <img class="logo" src="logo.svg" alt="WVYSY, WavySync logo">
-      <h1 data-i="hero.h">Your Wave Terminal, <em>on every computer.</em></h1>
-      <p class="lead" data-i="hero.p">Settings, workspaces, tabs, layouts, widgets and the tools behind them, synced through a GitHub repo you own. One folder per computer. Apply any of them anywhere.</p>
+      <h1 data-i="hero.h">Your WaveTerm is now&nbsp;&nbsp;<em>Synced !</em></h1>
+      <p class="lead" data-i="hero.p">Wavy~Sync can sync your waveterms' Settings, workspaces, tabs, layouts, widgets and the tools behind them, through a GitHub repo you own. It creates one folder per your device as 'profiles' so you can apply any of them without losing your different layouts.</p>
       <div class="cta">
         <a class="btn red" href="#download" data-i="hero.dl">Download</a>
-        <a class="btn" href="https://github.com/Ege-BULUT/WavySync" data-i="hero.gh">Source on GitHub</a>
+        <a class="btn" href="https://github.com/Ege-BULUT/WavySync" data-i="hero.gh">GitHub</a>
       </div>
-      <div class="ticker"><span>SYNC.<b>LIVE</b></span><span>MACOS · WINDOWS · LINUX</span><span>RUST + RUNE</span><span>MIT</span></div>
+      <div class="ticker"><span>WaVY.<b>SYnc</b></span><span>MACOS · WINDOWS · LINUX</span><span>Coded in Rust &amp; Rune</span><span>MIT</span></div>
     </div>
     <div class="shot"><img src="live.png" width="2400" height="1440" alt="WavySync window: what to sync on the left, live sync feed on the right"></div>
   </div>
@@ -227,11 +229,11 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
 <section id="how">
   <div class="wrap">
     <span class="caps" data-i="how.k">How it works</span>
-    <h2 data-i="how.h">Three computers, one repo, no guessing.</h2>
-    <p class="sub" data-i="how.p">Each computer writes only to its own folder. Every folder is a profile the others can take on.</p>
+    <h2 data-i="how.h">All your <em>WaveTerm</em> layouts stored in your own repo</h2>
+    <p class="sub" data-i="how.p">Wavy~Sync creates new folders for each of your devices/WaveTerm profiles by default.</p>
 
     <div class="stage reveal">
-      <div class="stage-head"><span class="caps">01</span><h3 data-i="d1.h">Every computer pushes its own folder</h3><p data-i="d1.p">A background process commits when Wave changes.</p></div>
+      <div class="stage-head"><span class="caps">01</span><h3 data-i="d1.h">Every profile updates its own folder</h3><p data-i="d1.p">By default, OR you can also pick another folder or create a new profile folder to keep both versions.</p></div>
       <svg viewBox="0 0 1100 380" role="img" aria-label="Three computers push to their own folders in one repo">
         <defs>
           <linearGradient id="wireGrad" x1="0" x2="1"><stop offset="0" stop-color="#cf0a2c"/><stop offset="1" stop-color="#b79cf0"/></linearGradient>
@@ -245,19 +247,18 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
         <path id="w4" class="wire" d="M 750 190 C 810 190 800 300 860 300"/>
 
         <g class="node" transform="translate(30 40)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">MacBook</text><text class="s" x="72" y="58">studio-mac-7f3a</text></g>
-        <g class="node" transform="translate(30 150)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Work iMac</text><text class="s" x="72" y="58">work-imac-2c91</text></g>
-        <g class="node" transform="translate(30 260)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Ubuntu lab</text><text class="s" x="72" y="58">ubuntu-lab-04be</text></g>
+        <g class="node" transform="translate(30 150)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Work iMac</text><text class="s" x="72" y="58">work-imac</text></g>
+        <g class="node" transform="translate(30 260)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Ubuntu lab</text><text class="s" x="72" y="58">ubuntu-lab</text></g>
 
-        <g class="node repo" transform="translate(470 70)">
-          <rect width="280" height="240" rx="20"/>
-          <text class="t" x="22" y="40">your-wave-profiles</text>
-          <text class="s" x="22" y="62" data-i="d1.repo">GitHub repo, private or public</text>
+        <g class="node repo" transform="translate(470 90)">
+          <rect width="280" height="200" rx="20"/>
+          <text class="t" x="22" y="40">username / wave-profiles</text>
+          <text class="s" x="22" y="62" data-i="d1.repo">Private or Public GitHub repo</text>
           <text class="folder on" x="22" y="104">▸ studio-mac-7f3a/</text>
-          <text class="folder on" style="animation-delay:1s" x="22" y="134">▸ work-imac-2c91/</text>
-          <text class="folder on" style="animation-delay:2s" x="22" y="164">▸ ubuntu-lab-04be/</text>
-          <text class="s" x="22" y="210">config · workspaces · extensions</text>
+          <text class="folder on" style="animation-delay:1s" x="22" y="134">▸ work-imac/</text>
+          <text class="folder on" style="animation-delay:2s" x="22" y="164">▸ ubuntu-lab/</text>
         </g>
-        <g class="node" transform="translate(860 250)"><rect width="210" height="100" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36" data-i="d1.new">New laptop</text><text class="s" x="72" y="58" data-i="d1.apply">apply work-imac-2c91</text><text class="s" x="72" y="80" fill="#4fd18b">✓ ready</text></g>
+        <g class="node" transform="translate(860 250)"><rect width="210" height="100" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36" data-i="d1.new">New laptop</text><text class="s" x="72" y="58" data-i="d1.apply">apply work-imac</text><text class="s" x="72" y="80" fill="#4fd18b">✓ ready</text></g>
         <text class="s" x="860" y="226" fill="#9a8fae" style="font:500 12px var(--mono)" data-i="d1.pull">pulls a profile</text>
         <circle class="pkt" r="6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
         <circle class="pkt" r="6"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
@@ -267,13 +268,13 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
     </div>
 
     <div class="stage reveal">
-      <div class="stage-head"><span class="caps">02</span><h3 data-i="d2.h">Applying a profile, step by step</h3><p data-i="d2.p">Nothing is lost: the current Wave is backed up first.</p></div>
+      <div class="stage-head"><span class="caps">02</span><h3 data-i="d2.h">How to apply a profile</h3></div>
       <div class="steps">
         <div class="rail" aria-hidden="true"><svg viewBox="0 0 1000 30" preserveAspectRatio="none"><path d="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15" fill="none" stroke="#3a2d4f" stroke-width="2"/><circle r="6" fill="#ff3355"><animateMotion dur="10s" repeatCount="indefinite" path="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15"/></circle></svg></div>
         <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><span class="n">01</span><h4 data-i="s1.h">Pick</h4><p data-i="s1.p">Choose a profile and where your future changes are saved.</p></div>
         <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></div><span class="n">02</span><h4 data-i="s2.h">Back up</h4><p data-i="s2.p">This Wave is saved to a local backup folder.</p></div>
         <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div><span class="n">03</span><h4 data-i="s3.h">Quit Wave</h4><p data-i="s3.p">Wave closes so its database can be written safely.</p></div>
-        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h10l6 6-6 6H4z"/></svg></div><span class="n">04</span><h4 data-i="s4.h">Write and install</h4><p data-i="s4.p">Config, workspaces and layouts land; widget tools get installed.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h10l6 6-6 6H4z"/></svg></div><span class="n">04</span><h4 data-i="s4.h">Write and install</h4><p data-i="s4.p">Layout syncs; widget tools get installed and are ready to use.</p></div>
         <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/></svg></div><span class="n">05</span><h4 data-i="s5.h">Back to live</h4><p data-i="s5.p">Wave starts again and changes flow to your chosen folder.</p></div>
       </div>
     </div>
@@ -301,7 +302,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
 <section id="features">
   <div class="wrap">
     <span class="caps" data-i="f.k">Features</span>
-    <h2 data-i="f.h">Everything Wave keeps, and nothing it shouldn't share.</h2>
+    <h2 data-i="f.h">Sync Options</h2>
     <p class="sub" data-i="f.p">Pick what travels. Each part has its own switch, and each widget has its own box.</p>
     <div class="grid">
       <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Layouts come across whole</h3><p data-i="f1.p">Workspaces, tabs, blocks and how you split them, read straight from Wave's database.</p></div>
@@ -317,8 +318,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
 <section id="screens">
   <div class="wrap">
     <span class="caps" data-i="g.k">The app</span>
-    <h2 data-i="g.h">A launcher shaped like a wave.</h2>
-    <p class="sub" data-i="g.p">Setup on the left, live sync on the right. The same three steps stay as settings.</p>
+    <h2 data-i="g.h"><em>Wavy~Sync</em> Launcher</h2>
     <div class="gallery">
       <figure class="reveal"><img src="sync.png" width="2400" height="1440" alt="Step 1, what to sync" loading="lazy"><figcaption data-i="g1">01 · What to sync, widgets expanded</figcaption></figure>
       <figure class="reveal"><img src="repo.png" width="2400" height="1440" alt="Step 2, repo" loading="lazy"><figcaption data-i="g2">02 · Your repos, or a new one</figcaption></figure>
@@ -358,8 +358,7 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
 <section id="download">
   <div class="wrap">
     <span class="caps" data-i="dl.k">Download</span>
-    <h2 data-i="dl.h">Get WavySync.</h2>
-    <p class="sub" data-i="dl.p">Run it, follow the three steps, and it adds itself to Wave's sidebar.</p>
+    <h2 data-i="dl.h">Get <em>Wavy~Sync</em>.</h2>
     <div class="dl">
       <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-arm64.tar.gz"><b>macOS</b><span>Apple silicon</span><i>.tar.gz ↓</i></a>
       <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-x64.tar.gz"><b>macOS</b><span>Intel</span><i>.tar.gz ↓</i></a>
@@ -380,34 +379,34 @@ footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space
 <script>
 const TR = {
   "nav.how": "Nasıl çalışır", "nav.features": "Özellikler", "nav.download": "İndir",
-  "hero.h": "Wave Terminal'in, <em>her bilgisayarda.</em>",
-  "hero.p": "Ayarlar, çalışma alanları, sekmeler, düzenler, widget'lar ve arkalarındaki araçlar, senin GitHub deponla senkron. Her bilgisayara bir klasör. Hangisini istersen her yerde uygula.",
-  "hero.dl": "İndir", "hero.gh": "GitHub'da kaynak kod",
-  "how.k": "Nasıl çalışır", "how.h": "Üç bilgisayar, tek depo, tahmin yok.",
-  "how.p": "Her bilgisayar yalnızca kendi klasörüne yazar. Her klasör, diğerlerinin uygulayabileceği bir profildir.",
-  "d1.h": "Her bilgisayar kendi klasörünü gönderir", "d1.p": "Arka plandaki süreç Wave değiştikçe commit atar.",
-  "d1.repo": "GitHub deposu, özel ya da public", "d1.new": "Yeni laptop", "d1.apply": "work-imac-2c91 uygula", "d1.pull": "bir profili çeker",
-  "d2.h": "Profil uygulamak, adım adım", "d2.p": "Hiçbir şey kaybolmaz: önce mevcut Wave yedeklenir.",
+  "hero.h": "WaveTerm'in artık&nbsp;&nbsp;<em>Senkron !</em>",
+  "hero.p": "Wavy~Sync, WaveTerm'inin ayarlarını, çalışma alanlarını, sekmelerini, düzenlerini, widget'larını ve arkalarındaki araçları senin GitHub deponla senkronlar. Her cihazın için 'profil' olarak bir klasör açar; farklı düzenlerini kaybetmeden istediğini uygulayabilirsin.",
+  "hero.dl": "İndir", "hero.gh": "GitHub",
+  "how.k": "Nasıl çalışır", "how.h": "Tüm <em>WaveTerm</em> düzenlerin kendi deponda",
+  "how.p": "Wavy~Sync varsayılan olarak her cihazın/WaveTerm profilin için yeni bir klasör açar.",
+  "d1.h": "Her profil kendi klasörünü günceller", "d1.p": "Varsayılan bu; istersen başka bir klasör seçebilir ya da iki sürümü de tutmak için yeni bir profil klasörü açabilirsin.",
+  "d1.repo": "Özel ya da public GitHub deposu", "d1.new": "Yeni laptop", "d1.apply": "work-imac uygula", "d1.pull": "bir profili çeker",
+  "d2.h": "Profil nasıl uygulanır",
   "s1.h": "Seç", "s1.p": "Profili ve ileride değişikliklerin nereye kaydedileceğini seç.",
   "s2.h": "Yedekle", "s2.p": "Bu Wave yerel bir yedek klasörüne kaydedilir.",
   "s3.h": "Wave'i kapat", "s3.p": "Veritabanı güvenle yazılsın diye Wave kapanır.",
-  "s4.h": "Yaz ve kur", "s4.p": "Ayarlar, çalışma alanları, düzenler yazılır; widget araçları kurulur.",
+  "s4.h": "Yaz ve kur", "s4.p": "Düzen senkronlanır; widget araçları kurulur ve kullanıma hazır olur.",
   "s5.h": "Yeniden canlı", "s5.p": "Wave yeniden açılır, değişiklikler seçtiğin klasöre akar.",
   "d3.h": "Widget'lar araçlarını da getirir", "d3.p": "WavySync her widget'ın neyi çalıştırdığını okur ve diğer tarafa kurar.", "d3.w": "Widget'lar",
-  "f.k": "Özellikler", "f.h": "Wave'in tuttuğu her şey, paylaşmaması gerekenler hariç.", "f.p": "Neyin taşınacağını sen seç. Her bölümün kendi anahtarı, her widget'ın kendi kutusu var.",
+  "f.k": "Özellikler", "f.h": "Senkron Seçenekleri", "f.p": "Neyin taşınacağını sen seç. Her bölümün kendi anahtarı, her widget'ın kendi kutusu var.",
   "f1.h": "Düzenler olduğu gibi gelir", "f1.p": "Çalışma alanları, sekmeler, bloklar ve bölme düzenin, doğrudan Wave'in veritabanından.",
   "f2.h": "Araçlarıyla birlikte widget'lar", "f2.p": "Git depoları ve derleme adımları, Homebrew, npm, cargo ya da widget'ın çalıştırdığı küçük betik.",
   "f3.h": "Her bilgisayara bir klasör", "f3.p": "Varsayılan adı bilgisayarın adı. Değiştir, başkasını uygula ya da yenisini aç.",
   "f4.h": "Sen çalıştıkça gönderir", "f4.p": "Sessiz bir arka plan süreci yalnızca gerçekten bir şey değiştiğinde commit atar.",
   "f5.h": "Gizli bilgiler evde kalır", "f5.p": "Token, anahtar ve parolalar ayıklanır. Ev klasörün {HOME} olur.",
   "f6.h": "Küçük bir Rust uygulaması", "f6.p": "macOS, Windows ve Linux için tek dosya, Rune ile çizilmiş; bir de Wave kenar çubuğunda widget.",
-  "g.k": "Uygulama", "g.h": "Dalga biçiminde bir başlatıcı.", "g.p": "Solda kurulum, sağda canlı senkron. Aynı üç adım ayar olarak kalır.",
+  "g.k": "Uygulama", "g.h": "<em>Wavy~Sync</em> Başlatıcı",
   "g1": "01 · Ne senkronlansın, widget'lar açık", "g2": "02 · Depoların ya da yeni bir depo", "g3": "03 · Uygula, değişikliklerin nereye gideceğini seç", "g4": "Canlı senkron akışı",
   "l.k": "Depoda", "l.h": "Okunabilir düz dosyalar.",
   "n.h": "Bilgisayarından hiç çıkmayanlar",
   "n.1": "<code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code> gibi adlı anahtarlar",
   "n.2": "Terminal geçmişi ve kaydırma arabelleği", "n.3": "GitHub girişin: sistem anahtar zincirinde kalır", "n.4": "İşaretlemediğin her şey",
-  "dl.k": "İndir", "dl.h": "WavySync'i edin.", "dl.p": "Çalıştır, üç adımı izle; kendini Wave'in kenar çubuğuna ekler.",
+  "dl.k": "İndir", "dl.h": "<em>Wavy~Sync</em>'i edin.",
   "dl.n": "Henüz imzalı değil. macOS'ta bir kez <code>xattr -d com.apple.quarantine ./wavysync</code> çalıştır. <code>git</code> gerekir.",
   "foot": "Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir."
 };
