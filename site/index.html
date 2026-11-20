@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WavySync</title>
+<meta name="description" content="Sync Wave Terminal across computers: settings, workspaces, tabs, layouts, widgets and the tools behind them, through a GitHub repo you own.">
+<meta property="og:title" content="WavySync">
+<meta property="og:description" content="Your Wave Terminal, on every computer.">
+<meta property="og:image" content="https://wavysync.vercel.app/sync.png">
+<meta name="theme-color" content="#120d19">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23120d19'/%3E%3Cpath d='M5 19c4-8 8-8 11-3s7 5 11-3' fill='none' stroke='%23ff3355' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #120d19; --bg2: #17111f; --panel: #1f172b; --panel2: #2a2039; --edge: #3a2d4f;
+  --violet: #6b5590; --lilac: #b79cf0; --red: #cf0a2c; --red2: #ff3355;
+  --ink: #ede6f5; --soft: #cfc4e2; --muted: #9a8fae; --dim: #6f6386; --ok: #4fd18b;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --wrap: min(1240px, calc(100vw - 32px));
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); overflow-x: hidden; }
+a { color: inherit; }
+img { height: auto; }
+.wrap { width: var(--wrap); margin: 0 auto; }
+.mono { font-family: var(--mono); }
+.caps { font: 700 12px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--red2); }
+
+/* nav */
+nav { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); background: rgba(18, 13, 25, .72); border-bottom: 1px solid rgba(58, 45, 79, .6); }
+nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+.brand { font: 800 21px/1 var(--sans); text-decoration: none; letter-spacing: -.02em; display: flex; align-items: baseline; gap: 10px; }
+.brand b { color: var(--red2); font-weight: 800; }
+.brand small { font: 500 11px var(--mono); color: var(--muted); letter-spacing: .1em; }
+nav .links { display: flex; gap: 22px; margin-left: auto; font-size: 14px; color: var(--soft); }
+nav .links a { text-decoration: none; }
+nav .links a:hover { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font: 600 14px var(--sans); text-decoration: none; border: 1px solid var(--edge); background: var(--panel2); color: var(--ink); cursor: pointer; transition: background .2s, transform .2s; }
+.btn:hover { background: var(--edge); transform: translateY(-1px); }
+.btn.red { background: var(--red); border-color: var(--red); }
+.btn.red:hover { background: var(--red2); border-color: var(--red2); }
+.lang { padding: 7px 11px; font: 700 12px var(--mono); }
+
+/* hero */
+.hero { position: relative; padding: 56px 0 40px; }
+.hero svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tilde-fill { fill: var(--bg2); stroke: var(--edge); stroke-width: 1.5; }
+.swift { fill: none; stroke-linecap: round; }
+.swift.base { stroke: rgba(207, 10, 44, .28); stroke-width: 1.2; }
+.swift.a { stroke: var(--red2); stroke-width: 3; stroke-dasharray: 260 2400; animation: flow 4.2s linear infinite; }
+.swift.b { stroke: var(--lilac); stroke-width: 1.6; stroke-dasharray: 120 2400; animation: flow 5.6s linear infinite reverse; opacity: .7; }
+.swift.c { stroke: var(--red); stroke-width: 2; stroke-dasharray: 80 1400; animation: flow 3.1s linear infinite; }
+@keyframes flow { from { stroke-dashoffset: 2600; } to { stroke-dashoffset: 0; } }
+.hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
+.logo { width: 100%; max-width: 640px; display: block; filter: drop-shadow(0 30px 60px rgba(207, 10, 44, .18)); border-radius: 20px; }
+h1 { font: 800 clamp(36px, 5vw, 62px)/1.04 var(--sans); letter-spacing: -.035em; margin: 34px 0 18px; }
+h1 em { font-style: normal; background: linear-gradient(90deg, var(--red2), var(--lilac)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lead { font-size: 18px; color: var(--soft); max-width: 560px; margin: 0 0 28px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.shot { position: relative; transform: perspective(1400px) rotateY(-9deg) rotateX(4deg); animation: float 7s ease-in-out infinite; }
+.shot img { width: 118%; max-width: none; margin-left: -6%; display: block; filter: drop-shadow(0 40px 70px rgba(0, 0, 0, .55)); }
+@keyframes float { 0%, 100% { transform: perspective(1400px) rotateY(-9deg) rotateX(4deg) translateY(0); } 50% { transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) translateY(-12px); } }
+.ticker { margin-top: 30px; display: flex; gap: 22px; flex-wrap: wrap; font: 500 12px var(--mono); color: var(--dim); letter-spacing: .08em; }
+.ticker span b { color: var(--ok); font-weight: 700; }
+
+/* sections */
+section { padding: 90px 0; position: relative; }
+h2 { font: 800 clamp(30px, 3.6vw, 44px)/1.1 var(--sans); letter-spacing: -.03em; margin: 12px 0 14px; }
+.sub { color: var(--soft); max-width: 640px; margin: 0 0 40px; font-size: 17px; }
+.divider { display: block; width: 100%; height: 70px; }
+.divider path { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+.divider .run { stroke: var(--red2); stroke-width: 2.5; stroke-dasharray: 140 3000; animation: flow 5s linear infinite; }
+
+/* diagrams */
+.stage { background: linear-gradient(180deg, var(--bg2), var(--bg)); border: 1px solid var(--edge); border-radius: 28px; padding: 28px; position: relative; overflow: hidden; }
+.stage + .stage { margin-top: 26px; }
+.stage-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+.stage-head h3 { font: 700 21px var(--sans); margin: 0; letter-spacing: -.01em; }
+.stage-head p { margin: 0; color: var(--muted); font-size: 15px; }
+.stage svg { width: 100%; height: auto; display: block; }
+.node rect { fill: var(--panel); stroke: var(--edge); stroke-width: 1.5; }
+.node .t { fill: var(--ink); font: 600 15px var(--sans); }
+.node .s { fill: var(--muted); font: 500 12px var(--mono); }
+.node.repo rect { fill: #221530; stroke: var(--red); stroke-width: 2; }
+.node .scr { fill: var(--bg); stroke: var(--edge); }
+.wire { fill: none; stroke: var(--edge); stroke-width: 2; }
+.wire.hot { stroke: url(#wireGrad); stroke-width: 2.5; stroke-dasharray: 8 10; animation: dash 1.2s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -36; } }
+.pkt { fill: var(--red2); filter: drop-shadow(0 0 6px var(--red2)); }
+.pkt.v { fill: var(--lilac); filter: drop-shadow(0 0 6px var(--lilac)); }
+.folder { font: 500 12.5px var(--mono); fill: var(--soft); }
+.folder.on { animation: blink 3s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { fill: var(--soft); } 12% { fill: var(--red2); } 30% { fill: var(--soft); } }
+
+/* apply pipeline */
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 22px; position: relative; }
+.step { background: var(--panel); border: 1px solid var(--edge); border-radius: 16px; padding: 16px; position: relative; animation: lit 10s infinite; }
+.step:nth-child(1) { animation-delay: 0s; } .step:nth-child(2) { animation-delay: 2s; } .step:nth-child(3) { animation-delay: 4s; } .step:nth-child(4) { animation-delay: 6s; } .step:nth-child(5) { animation-delay: 8s; }
+@keyframes lit { 0% { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 14px 40px rgba(207, 10, 44, .25); transform: translateY(-4px); } 18% { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 14px 40px rgba(207, 10, 44, .25); transform: translateY(-4px); } 24%, 100% { border-color: var(--edge); box-shadow: none; transform: none; } }
+.step .n { font: 700 12px var(--mono); color: var(--red2); letter-spacing: .12em; }
+.step h4 { margin: 8px 0 6px; font: 700 16px var(--sans); }
+.step p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.step .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--panel2); display: grid; place-items: center; margin-bottom: 10px; }
+.step .ic svg { width: 20px; height: 20px; stroke: var(--lilac); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rail { position: absolute; left: 0; right: 0; top: -14px; height: 6px; }
+.rail svg { width: 100%; height: 30px; overflow: visible; }
+
+/* widget deps */
+.deps { display: grid; grid-template-columns: 260px 1fr; gap: 26px; align-items: center; margin-top: 18px; }
+.wcard { background: var(--panel); border: 1px solid var(--edge); border-radius: 18px; padding: 18px; }
+.wcard .row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 14.5px; }
+.chk { width: 16px; height: 16px; border-radius: 4px; background: var(--red); display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 800; flex: none; }
+.chips { display: flex; flex-direction: column; gap: 12px; }
+.chip { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 12px 16px; font: 500 13.5px var(--mono); color: var(--soft); opacity: 0; transform: translateX(-24px); animation: chipIn 9s infinite; }
+.chip:nth-child(2) { animation-delay: .5s; } .chip:nth-child(3) { animation-delay: 1s; } .chip:nth-child(4) { animation-delay: 1.5s; }
+.chip b { color: var(--ink); font-weight: 700; min-width: 64px; }
+.chip .ok { margin-left: auto; color: var(--ok); opacity: 0; animation: okIn 9s infinite; animation-delay: inherit; }
+@keyframes chipIn { 0% { opacity: 0; transform: translateX(-24px); } 8%, 82% { opacity: 1; transform: none; } 92%, 100% { opacity: 0; transform: translateX(12px); } }
+@keyframes okIn { 0%, 30% { opacity: 0; } 38%, 82% { opacity: 1; } 92%, 100% { opacity: 0; } }
+
+/* features */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card { background: var(--bg2); border: 1px solid var(--edge); border-radius: 20px; padding: 22px; position: relative; overflow: hidden; transition: border-color .25s, transform .25s; }
+.card:hover { border-color: var(--violet); transform: translateY(-3px); }
+.card::after { content: ""; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(207, 10, 44, .18), transparent 70%); }
+.card h3 { margin: 0 0 8px; font: 700 18px var(--sans); }
+.card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.card .k { font: 700 11px var(--mono); color: var(--lilac); letter-spacing: .14em; display: block; margin-bottom: 12px; }
+
+/* gallery */
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.gallery figure { margin: 0; background: radial-gradient(ellipse at 50% 40%, #2a1d3a, var(--bg) 70%); border: 1px solid var(--edge); border-radius: 22px; padding: 16px 6px 12px; }
+.gallery img { width: 100%; display: block; }
+.gallery figcaption { text-align: center; color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* layout + download */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+pre.tree { margin: 0; background: var(--bg2); border: 1px solid var(--edge); border-radius: 20px; padding: 22px; font: 500 13.5px/1.75 var(--mono); color: var(--soft); overflow-x: auto; }
+pre.tree .c { color: var(--dim); }
+pre.tree .r { color: var(--red2); }
+.never { background: var(--bg2); border: 1px solid var(--edge); border-radius: 20px; padding: 22px; }
+.never h3 { margin: 0 0 10px; font: 700 18px var(--sans); }
+.never ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14.5px; }
+.never li { margin: 6px 0; }
+.never code, .dl code { font: 500 13px var(--mono); color: var(--lilac); }
+.dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.os { background: var(--bg2); border: 1px solid var(--edge); border-radius: 18px; padding: 20px; text-decoration: none; display: flex; flex-direction: column; gap: 6px; transition: border-color .2s, transform .2s; }
+.os:hover { border-color: var(--red); transform: translateY(-3px); }
+.os b { font: 700 17px var(--sans); }
+.os span { color: var(--muted); font: 500 12.5px var(--mono); }
+.os i { font-style: normal; color: var(--red2); font: 700 13px var(--sans); margin-top: 8px; }
+.note { color: var(--muted); font-size: 14px; margin-top: 18px; }
+footer { border-top: 1px solid var(--edge); padding: 30px 0 46px; color: var(--dim); font-size: 13.5px; }
+footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between; }
+
+.hero-grid > *, .split > *, .deps > *, .grid > *, .gallery > * { min-width: 0; }
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 980px) {
+  .hero-grid, .split, .deps { grid-template-columns: 1fr; }
+  .shot img { width: 100%; margin: 0; }
+  .never { margin-top: 0 !important; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .dl { grid-template-columns: 1fr 1fr; }
+  nav .links a.opt { display: none; }
+}
+@media (max-width: 620px) {
+  .grid, .gallery, .steps, .dl { grid-template-columns: 1fr; }
+  .stage { padding: 18px; border-radius: 20px; }
+  section { padding: 60px 0; }
+  nav .links { gap: 14px; }
+  .brand small { display: none; }
+  .rail { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+  .chip, .chip .ok { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#">Wavy<b>~</b>Sync <small>WVYSY</small></a>
+    <div class="links">
+      <a href="#how" class="opt" data-i="nav.how">How it works</a>
+      <a href="#features" class="opt" data-i="nav.features">Features</a>
+      <a href="#download" data-i="nav.download">Download</a>
+      <a href="https://github.com/Ege-BULUT/WavySync">GitHub</a>
+    </div>
+    <button class="btn lang" id="lang" aria-label="Language">TR</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg class="bg" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path class="tilde-fill" opacity=".55" d="M -40 120 H 520 C 640 120 660 210 720 300 C 760 360 800 380 900 380 H 1500 V 760 H 960 C 840 760 800 680 760 600 C 720 530 690 500 590 500 H -40 Z"/>
+    <path class="swift base" d="M -40 640 C 300 640 420 420 720 400 S 1160 170 1500 150"/>
+    <path class="swift a" d="M -40 640 C 300 640 420 420 720 400 S 1160 170 1500 150"/>
+    <path class="swift b" d="M -40 690 C 320 690 440 470 720 440 S 1140 220 1500 200"/>
+    <path class="swift c" d="M 20 90 C 160 20 340 0 560 40"/>
+    <path class="swift c" style="animation-delay:-1.4s" d="M 900 720 C 1080 750 1260 720 1440 640"/>
+  </svg>
+  <div class="wrap hero-grid">
+    <div>
+      <img class="logo" src="logo.svg" alt="WVYSY, WavySync logo">
+      <h1 data-i="hero.h">Your Wave Terminal, <em>on every computer.</em></h1>
+      <p class="lead" data-i="hero.p">Settings, workspaces, tabs, layouts, widgets and the tools behind them, synced through a GitHub repo you own. One folder per computer. Apply any of them anywhere.</p>
+      <div class="cta">
+        <a class="btn red" href="#download" data-i="hero.dl">Download</a>
+        <a class="btn" href="https://github.com/Ege-BULUT/WavySync" data-i="hero.gh">Source on GitHub</a>
+      </div>
+      <div class="ticker"><span>SYNC.<b>LIVE</b></span><span>MACOS · WINDOWS · LINUX</span><span>RUST + RUNE</span><span>MIT</span></div>
+    </div>
+    <div class="shot"><img src="live.png" width="2400" height="1440" alt="WavySync window: what to sync on the left, live sync feed on the right"></div>
+  </div>
+</header>
+
+<svg class="divider" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 50 C 360 50 420 14 720 14 S 1080 50 1440 50"/><path class="run" d="M0 50 C 360 50 420 14 720 14 S 1080 50 1440 50"/></svg>
+
+<section id="how">
+  <div class="wrap">
+    <span class="caps" data-i="how.k">How it works</span>
+    <h2 data-i="how.h">Three computers, one repo, no guessing.</h2>
+    <p class="sub" data-i="how.p">Each computer writes only to its own folder. Every folder is a profile the others can take on.</p>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">01</span><h3 data-i="d1.h">Every computer pushes its own folder</h3><p data-i="d1.p">A background process commits when Wave changes.</p></div>
+      <svg viewBox="0 0 1100 380" role="img" aria-label="Three computers push to their own folders in one repo">
+        <defs>
+          <linearGradient id="wireGrad" x1="0" x2="1"><stop offset="0" stop-color="#cf0a2c"/><stop offset="1" stop-color="#b79cf0"/></linearGradient>
+        </defs>
+        <path id="w1" class="wire" d="M 230 80 C 360 80 380 190 470 190"/>
+        <path id="w2" class="wire" d="M 230 190 C 330 190 380 190 470 190"/>
+        <path id="w3" class="wire" d="M 230 300 C 360 300 380 190 470 190"/>
+        <path class="wire hot" d="M 230 80 C 360 80 380 190 470 190"/>
+        <path class="wire hot" style="animation-delay:-.4s" d="M 230 190 C 330 190 380 190 470 190"/>
+        <path class="wire hot" style="animation-delay:-.8s" d="M 230 300 C 360 300 380 190 470 190"/>
+        <path id="w4" class="wire" d="M 750 190 C 830 190 850 300 960 300"/>
+        <circle class="pkt" r="6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
+        <circle class="pkt" r="6"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
+        <circle class="pkt v" r="7"><animateMotion dur="3.6s" begin=".6s" repeatCount="indefinite"><mpath href="#w4"/></animateMotion></circle>
+
+        <g class="node" transform="translate(30 40)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">MacBook</text><text class="s" x="72" y="58">studio-mac-7f3a</text></g>
+        <g class="node" transform="translate(30 150)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Work iMac</text><text class="s" x="72" y="58">work-imac-2c91</text></g>
+        <g class="node" transform="translate(30 260)"><rect width="200" height="80" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36">Ubuntu lab</text><text class="s" x="72" y="58">ubuntu-lab-04be</text></g>
+
+        <g class="node repo" transform="translate(470 70)">
+          <rect width="280" height="240" rx="20"/>
+          <text class="t" x="22" y="40">your-wave-profiles</text>
+          <text class="s" x="22" y="62" data-i="d1.repo">GitHub repo, private or public</text>
+          <text class="folder on" x="22" y="104">▸ studio-mac-7f3a/</text>
+          <text class="folder on" style="animation-delay:1s" x="22" y="134">▸ work-imac-2c91/</text>
+          <text class="folder on" style="animation-delay:2s" x="22" y="164">▸ ubuntu-lab-04be/</text>
+          <text class="s" x="22" y="210">config · workspaces · extensions</text>
+        </g>
+        <g class="node" transform="translate(860 250)"><rect width="210" height="100" rx="16"/><rect class="scr" x="14" y="16" width="44" height="32" rx="5"/><text class="t" x="72" y="36" data-i="d1.new">New laptop</text><text class="s" x="72" y="58" data-i="d1.apply">apply work-imac-2c91</text><text class="s" x="72" y="80" fill="#4fd18b">✓ ready</text></g>
+        <text class="s" x="860" y="226" fill="#9a8fae" style="font:500 12px var(--mono)" data-i="d1.pull">pulls a profile</text>
+      </svg>
+    </div>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">02</span><h3 data-i="d2.h">Applying a profile, step by step</h3><p data-i="d2.p">Nothing is lost: the current Wave is backed up first.</p></div>
+      <div class="steps">
+        <div class="rail" aria-hidden="true"><svg viewBox="0 0 1000 30" preserveAspectRatio="none"><path d="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15" fill="none" stroke="#3a2d4f" stroke-width="2"/><circle r="6" fill="#ff3355"><animateMotion dur="10s" repeatCount="indefinite" path="M0 15 C 100 0 150 30 250 15 S 400 0 500 15 S 650 30 750 15 S 900 0 1000 15"/></circle></svg></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><span class="n">01</span><h4 data-i="s1.h">Pick</h4><p data-i="s1.p">Choose a profile and where your future changes are saved.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></div><span class="n">02</span><h4 data-i="s2.h">Back up</h4><p data-i="s2.p">This Wave is saved to a local backup folder.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div><span class="n">03</span><h4 data-i="s3.h">Quit Wave</h4><p data-i="s3.p">Wave closes so its database can be written safely.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h10l6 6-6 6H4z"/></svg></div><span class="n">04</span><h4 data-i="s4.h">Write and install</h4><p data-i="s4.p">Config, workspaces and layouts land; widget tools get installed.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/></svg></div><span class="n">05</span><h4 data-i="s5.h">Back to live</h4><p data-i="s5.p">Wave starts again and changes flow to your chosen folder.</p></div>
+      </div>
+    </div>
+
+    <div class="stage reveal">
+      <div class="stage-head"><span class="caps">03</span><h3 data-i="d3.h">Widgets bring their tools</h3><p data-i="d3.p">WavySync reads what each widget runs and installs it on the other side.</p></div>
+      <div class="deps">
+        <div class="wcard">
+          <div class="caps" style="margin-bottom:10px" data-i="d3.w">Widgets</div>
+          <div class="row"><span class="chk">✓</span>clock</div>
+          <div class="row"><span class="chk">✓</span>chat</div>
+          <div class="row"><span class="chk">✓</span>btop</div>
+        </div>
+        <div class="chips">
+          <div class="chip"><b>git</b>clone someone/wave-clock<span class="ok">✓ cloned</span></div>
+          <div class="chip"><b>build</b>npm ci && npm run build<span class="ok">✓ built</span></div>
+          <div class="chip"><b>file</b>{HOME}/.local/bin/chat<span class="ok">✓ written</span></div>
+          <div class="chip"><b>brew</b>install btop<span class="ok">✓ installed</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <span class="caps" data-i="f.k">Features</span>
+    <h2 data-i="f.h">Everything Wave keeps, and nothing it shouldn't share.</h2>
+    <p class="sub" data-i="f.p">Pick what travels. Each part has its own switch, and each widget has its own box.</p>
+    <div class="grid">
+      <div class="card reveal"><span class="k">WORKSPACES</span><h3 data-i="f1.h">Layouts come across whole</h3><p data-i="f1.p">Workspaces, tabs, blocks and how you split them, read straight from Wave's database.</p></div>
+      <div class="card reveal"><span class="k">WIDGETS</span><h3 data-i="f2.h">Widgets with their tools</h3><p data-i="f2.p">Git repos and build steps, Homebrew, npm, cargo, or the small script a widget runs.</p></div>
+      <div class="card reveal"><span class="k">PROFILES</span><h3 data-i="f3.h">One folder per computer</h3><p data-i="f3.p">Named after the computer by default. Rename it, apply another, or start a new one.</p></div>
+      <div class="card reveal"><span class="k">LIVE</span><h3 data-i="f4.h">Pushes as you go</h3><p data-i="f4.p">A quiet background process commits only when something actually changed.</p></div>
+      <div class="card reveal"><span class="k">PRIVATE</span><h3 data-i="f5.h">Secrets stay home</h3><p data-i="f5.p">Tokens, keys and passwords are stripped. Your home folder becomes {HOME}.</p></div>
+      <div class="card reveal"><span class="k">NATIVE</span><h3 data-i="f6.h">Small Rust app</h3><p data-i="f6.p">One binary for macOS, Windows and Linux, drawn with Rune, plus a widget in Wave's sidebar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="screens">
+  <div class="wrap">
+    <span class="caps" data-i="g.k">The app</span>
+    <h2 data-i="g.h">A launcher shaped like a wave.</h2>
+    <p class="sub" data-i="g.p">Setup on the left, live sync on the right. The same three steps stay as settings.</p>
+    <div class="gallery">
+      <figure class="reveal"><img src="sync.png" width="2400" height="1440" alt="Step 1, what to sync" loading="lazy"><figcaption data-i="g1">01 · What to sync, widgets expanded</figcaption></figure>
+      <figure class="reveal"><img src="repo.png" width="2400" height="1440" alt="Step 2, repo" loading="lazy"><figcaption data-i="g2">02 · Your repos, or a new one</figcaption></figure>
+      <figure class="reveal"><img src="apply.png" width="2400" height="1440" alt="Apply dialog" loading="lazy"><figcaption data-i="g3">03 · Apply, and choose where changes go</figcaption></figure>
+      <figure class="reveal"><img src="live.png" width="2400" height="1440" alt="Live sync" loading="lazy"><figcaption data-i="g4">Live sync feed</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="layout">
+  <div class="wrap split">
+    <div>
+      <span class="caps" data-i="l.k">In the repo</span>
+      <h2 data-i="l.h">Plain files you can read.</h2>
+      <pre class="tree"><span class="r">your-wave-profiles/</span>
+├── studio-mac-7f3a/
+│   ├── wavysync.json     <span class="c"># host, system, last update</span>
+│   ├── config/           <span class="c"># settings, widgets, themes</span>
+│   ├── workspaces.json   <span class="c"># workspaces, tabs, layouts</span>
+│   ├── extensions.json   <span class="c"># what widgets need</span>
+│   └── files/            <span class="c"># small scripts, under {HOME}</span>
+├── work-imac-2c91/
+└── ubuntu-lab-04be/</pre>
+    </div>
+    <div class="never reveal" style="margin-top:58px">
+      <h3 data-i="n.h">Never leaves your computer</h3>
+      <ul>
+        <li data-i="n.1">Keys named like <code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code></li>
+        <li data-i="n.2">Terminal history and scrollback</li>
+        <li data-i="n.3">Your GitHub sign in: it stays in the system keychain</li>
+        <li data-i="n.4">Anything you leave unticked</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <span class="caps" data-i="dl.k">Download</span>
+    <h2 data-i="dl.h">Get WavySync.</h2>
+    <p class="sub" data-i="dl.p">Run it, follow the three steps, and it adds itself to Wave's sidebar.</p>
+    <div class="dl">
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-arm64.tar.gz"><b>macOS</b><span>Apple silicon</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-macos-x64.tar.gz"><b>macOS</b><span>Intel</span><i>.tar.gz ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-windows-x64.exe"><b>Windows</b><span>x64</span><i>.exe ↓</i></a>
+      <a class="os" href="https://github.com/Ege-BULUT/WavySync/releases/latest/download/wavysync-linux-x64.tar.gz"><b>Linux</b><span>x64</span><i>.tar.gz ↓</i></a>
+    </div>
+    <p class="note" data-i="dl.n">Not signed yet. On macOS run <code>xattr -d com.apple.quarantine ./wavysync</code> once. Needs <code>git</code>.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>WavySync · MIT · <a href="https://github.com/Ege-BULUT/WavySync">github.com/Ege-BULUT/WavySync</a></span>
+    <span data-i="foot">Wave Terminal is a separate project, not affiliated with WavySync.</span>
+  </div>
+</footer>
+
+<script>
+const TR = {
+  "nav.how": "Nasıl çalışır", "nav.features": "Özellikler", "nav.download": "İndir",
+  "hero.h": "Wave Terminal'in, <em>her bilgisayarda.</em>",
+  "hero.p": "Ayarlar, çalışma alanları, sekmeler, düzenler, widget'lar ve arkalarındaki araçlar, senin GitHub deponla senkron. Her bilgisayara bir klasör. Hangisini istersen her yerde uygula.",
+  "hero.dl": "İndir", "hero.gh": "GitHub'da kaynak kod",
+  "how.k": "Nasıl çalışır", "how.h": "Üç bilgisayar, tek depo, tahmin yok.",
+  "how.p": "Her bilgisayar yalnızca kendi klasörüne yazar. Her klasör, diğerlerinin uygulayabileceği bir profildir.",
+  "d1.h": "Her bilgisayar kendi klasörünü gönderir", "d1.p": "Arka plandaki süreç Wave değiştikçe commit atar.",
+  "d1.repo": "GitHub deposu, özel ya da public", "d1.new": "Yeni laptop", "d1.apply": "work-imac-2c91 uygula", "d1.pull": "bir profili çeker",
+  "d2.h": "Profil uygulamak, adım adım", "d2.p": "Hiçbir şey kaybolmaz: önce mevcut Wave yedeklenir.",
+  "s1.h": "Seç", "s1.p": "Profili ve ileride değişikliklerin nereye kaydedileceğini seç.",
+  "s2.h": "Yedekle", "s2.p": "Bu Wave yerel bir yedek klasörüne kaydedilir.",
+  "s3.h": "Wave'i kapat", "s3.p": "Veritabanı güvenle yazılsın diye Wave kapanır.",
+  "s4.h": "Yaz ve kur", "s4.p": "Ayarlar, çalışma alanları, düzenler yazılır; widget araçları kurulur.",
+  "s5.h": "Yeniden canlı", "s5.p": "Wave yeniden açılır, değişiklikler seçtiğin klasöre akar.",
+  "d3.h": "Widget'lar araçlarını da getirir", "d3.p": "WavySync her widget'ın neyi çalıştırdığını okur ve diğer tarafa kurar.", "d3.w": "Widget'lar",
+  "f.k": "Özellikler", "f.h": "Wave'in tuttuğu her şey, paylaşmaması gerekenler hariç.", "f.p": "Neyin taşınacağını sen seç. Her bölümün kendi anahtarı, her widget'ın kendi kutusu var.",
+  "f1.h": "Düzenler olduğu gibi gelir", "f1.p": "Çalışma alanları, sekmeler, bloklar ve bölme düzenin, doğrudan Wave'in veritabanından.",
+  "f2.h": "Araçlarıyla birlikte widget'lar", "f2.p": "Git depoları ve derleme adımları, Homebrew, npm, cargo ya da widget'ın çalıştırdığı küçük betik.",
+  "f3.h": "Her bilgisayara bir klasör", "f3.p": "Varsayılan adı bilgisayarın adı. Değiştir, başkasını uygula ya da yenisini aç.",
+  "f4.h": "Sen çalıştıkça gönderir", "f4.p": "Sessiz bir arka plan süreci yalnızca gerçekten bir şey değiştiğinde commit atar.",
+  "f5.h": "Gizli bilgiler evde kalır", "f5.p": "Token, anahtar ve parolalar ayıklanır. Ev klasörün {HOME} olur.",
+  "f6.h": "Küçük bir Rust uygulaması", "f6.p": "macOS, Windows ve Linux için tek dosya, Rune ile çizilmiş; bir de Wave kenar çubuğunda widget.",
+  "g.k": "Uygulama", "g.h": "Dalga biçiminde bir başlatıcı.", "g.p": "Solda kurulum, sağda canlı senkron. Aynı üç adım ayar olarak kalır.",
+  "g1": "01 · Ne senkronlansın, widget'lar açık", "g2": "02 · Depoların ya da yeni bir depo", "g3": "03 · Uygula, değişikliklerin nereye gideceğini seç", "g4": "Canlı senkron akışı",
+  "l.k": "Depoda", "l.h": "Okunabilir düz dosyalar.",
+  "n.h": "Bilgisayarından hiç çıkmayanlar",
+  "n.1": "<code>token</code>, <code>secret</code>, <code>password</code>, <code>apikey</code>, <code>privatekey</code> gibi adlı anahtarlar",
+  "n.2": "Terminal geçmişi ve kaydırma arabelleği", "n.3": "GitHub girişin: sistem anahtar zincirinde kalır", "n.4": "İşaretlemediğin her şey",
+  "dl.k": "İndir", "dl.h": "WavySync'i edin.", "dl.p": "Çalıştır, üç adımı izle; kendini Wave'in kenar çubuğuna ekler.",
+  "dl.n": "Henüz imzalı değil. macOS'ta bir kez <code>xattr -d com.apple.quarantine ./wavysync</code> çalıştır. <code>git</code> gerekir.",
+  "foot": "Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir."
+};
+const EN = {};
+document.querySelectorAll("[data-i]").forEach(el => { EN[el.dataset.i] = el.innerHTML; });
+// SVG <text> has no innerHTML in every browser, so use textContent there.
+function setLang(tr) {
+  const dict = tr ? TR : EN;
+  document.documentElement.lang = tr ? "tr" : "en";
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const v = dict[el.dataset.i];
+    if (v == null) return;
+    if (el instanceof SVGElement) el.textContent = v; else el.innerHTML = v;
+  });
+  document.getElementById("lang").textContent = tr ? "EN" : "TR";
+  try { localStorage.setItem("wvysy-lang", tr ? "tr" : "en"); } catch (e) {}
+}
+let saved = null;
+try { saved = localStorage.getItem("wvysy-lang"); } catch (e) {}
+let tr = saved ? saved === "tr" : (navigator.language || "").toLowerCase().startsWith("tr");
+if (tr) setLang(true);
+document.getElementById("lang").addEventListener("click", () => { tr = !tr; setLang(tr); });
+
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+</script>
+</body>
+</html>
