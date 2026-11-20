@@ -155,6 +155,9 @@ function pick(t) {
 
 function select(el) {
   clearSel();
+  // The page's own TR/EN button can switch the language behind the editor's back.
+  lang = doc.documentElement.lang === "tr" ? "tr" : "en";
+  document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   const key = pathOf(el), scope = key.startsWith("i:") ? lang : "*", id = scope + "|" + key;
   const kind = kindOf(el);
   const e = edits[id] || { key, scope, kind, label: label(el), before: get(el, kind), after: null, note: "" };
