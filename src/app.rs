@@ -31,8 +31,8 @@ pub const LIVE: [(&str, bool); 6] = [
     ("ai", true),
 ];
 pub const KEYRING_SERVICE: &str = "WavySync";
-/// GitHub OAuth app for the device-code sign-in. Empty until the app is registered; WAVYSYNC_CLIENT_ID overrides.
-pub const CLIENT_ID: &str = "";
+/// GitHub OAuth app "WavySync" for the device-code sign-in; WAVYSYNC_CLIENT_ID overrides.
+pub const CLIENT_ID: &str = "Ov23liCLOPIoAcmHKqXB";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default)]
