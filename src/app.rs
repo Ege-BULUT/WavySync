@@ -20,6 +20,16 @@ pub const ITEMS: [(&str, bool); 6] = [
     ("connections", true),
     ("ai", false),
 ];
+/// What live sync pushes on its own, of the items above. Layouts change with every pane and tab,
+/// so they wait for a manual Push unless the user turns them on.
+pub const LIVE: [(&str, bool); 6] = [
+    ("settings", true),
+    ("workspaces", false),
+    ("widgets", true),
+    ("themes", true),
+    ("connections", true),
+    ("ai", true),
+];
 pub const KEYRING_SERVICE: &str = "WavySync";
 /// GitHub OAuth app for the device-code sign-in. Empty until the app is registered; WAVYSYNC_CLIENT_ID overrides.
 pub const CLIENT_ID: &str = "";
@@ -36,7 +46,9 @@ pub struct Config {
     pub target: String,
     pub items: BTreeMap<String, bool>,
     pub widgets: BTreeMap<String, bool>,
+    /// Live sync on or off, and which of the synced items it pushes by itself.
     pub auto: bool,
+    pub live: BTreeMap<String, bool>,
     pub interval: u64,
     pub setup_done: bool,
 }
@@ -53,6 +65,7 @@ impl Default for Config {
             items: ITEMS.iter().map(|(k, v)| (k.to_string(), *v)).collect(),
             widgets: BTreeMap::new(),
             auto: true,
+            live: LIVE.iter().map(|(k, v)| (k.to_string(), *v)).collect(),
             interval: 30,
             setup_done: false,
         }
@@ -70,6 +83,10 @@ impl Config {
     pub fn save(&self) {
         let _ = fs::create_dir_all(dir());
         let _ = fs::write(dir().join("config.json"), serde_json::to_vec_pretty(self).unwrap());
+    }
+    /// The items live sync pushes: synced at all, and switched on for live.
+    pub fn live_items(&self) -> BTreeMap<String, bool> {
+        self.items.iter().map(|(k, on)| (k.clone(), *on && self.live.get(k).copied().unwrap_or(k != "workspaces"))).collect()
     }
     pub fn repo(&self) -> Repo {
         Repo { dir: dir().join("repo"), url: repo::normalize(&self.repo), token: if self.guest { None } else { token() } }
@@ -138,6 +155,7 @@ pub fn client_id() -> String {
 pub struct Status {
     pub last_check: u64,
     pub last_push: u64,
+    pub last_pull: u64,
     pub last_hash: u64,
     pub error: String,
     pub feed: Vec<(u64, String)>,
@@ -173,18 +191,21 @@ fn meta() -> Value {
 
 /// Exports this computer's Wave and pushes it to the target folder if anything changed.
 /// `force` pushes even when the export matches the last one (the folder may have changed remotely).
-pub fn sync_once(cfg: &Config, force: bool) -> Result<Option<String>, String> {
+/// `live` pushes only the live items and leaves the rest of the folder as the last Push left it.
+pub fn sync_once(cfg: &Config, force: bool, live: bool) -> Result<Option<String>, String> {
+    let items = if live { cfg.live_items() } else { cfg.items.clone() };
+    let keep = |rel: &str| live && !items.get(wave::folder_category(rel)).copied().unwrap_or(false);
     with_lock(|| {
         let mut st = Status::load();
         st.last_check = repo::now();
-        let res = wave::export(&cfg.items, &cfg.widgets).and_then(|files| {
+        let res = wave::export(&items, &cfg.widgets).and_then(|files| {
             let hash = hash_of(&files, &cfg.target);
             if !force && hash == st.last_hash {
                 return Ok(None);
             }
             st.last_hash = hash;
             let changed: Vec<String> = changed_files(&cfg.repo().dir.join(&cfg.target), &files);
-            cfg.repo().save(&cfg.target, files, meta()).map(|c| c.map(|c| (c, changed)))
+            cfg.repo().save(&cfg.target, files, meta(), keep).map(|c| c.map(|c| (c, changed)))
         });
         let out = match res {
             Ok(Some((commit, changed))) => {
@@ -236,15 +257,27 @@ pub fn apply_profile(profile: &str, save_to: &str) -> Result<Vec<String>, String
         }
         let backup = dir().join("backups").join(repo::now().to_string());
         let all_widgets = BTreeMap::new();
-        for (rel, bytes) in wave::export(&cfg.items, &all_widgets)? {
+        let local = wave::export(&cfg.items, &all_widgets)?;
+        for (rel, bytes) in &local {
             let p = backup.join(rel);
             fs::create_dir_all(p.parent().unwrap()).map_err(|e| e.to_string())?;
             fs::write(p, bytes).map_err(|e| e.to_string())?;
         }
+        // Layouts live in Wave's database, so writing them means closing Wave. Skip that when the
+        // profile's layouts are the ones this Wave already has.
+        let mut items = cfg.items.clone();
+        let as_json = |b: &[u8]| serde_json::from_slice::<Value>(b).ok();
+        let incoming = fs::read(src.join("workspaces.json")).ok();
+        if incoming.as_deref().map(as_json) == Some(local.get("workspaces.json").and_then(|b| as_json(b))) || incoming.is_none() {
+            items.insert("workspaces".into(), false);
+        }
+        let quit = items.get("workspaces").copied().unwrap_or(true);
         let was_running = wave::wave_running();
-        wave::quit_wave()?;
-        let r = wave::apply(&src, &cfg.items, repo.token.as_deref());
-        if was_running {
+        if quit {
+            wave::quit_wave()?;
+        }
+        let r = wave::apply(&src, &items, repo.token.as_deref());
+        if quit && was_running {
             wave::launch_wave();
         }
         let mut r = r?;
@@ -254,9 +287,16 @@ pub fn apply_profile(profile: &str, save_to: &str) -> Result<Vec<String>, String
     cfg.target = save_to.to_string();
     cfg.save();
     let mut st = Status::load();
-    st.note(format!("applied {profile}, saving to {save_to}"));
+    st.last_pull = repo::now();
+    st.note(if profile == save_to { format!("pulled {profile}") } else { format!("applied {profile}, saving to {save_to}") });
     st.save();
     Ok(report)
+}
+
+/// Brings the folder this computer saves to back into this Wave: what another computer pushed there.
+pub fn pull() -> Result<Vec<String>, String> {
+    let target = Config::load().target;
+    apply_profile(&target, &target)
 }
 
 // Start at login, the Wave widget, and detached children ----------------------------------------
@@ -333,7 +373,7 @@ pub fn daemon() {
     loop {
         let cfg = Config::load();
         if cfg.setup_done && cfg.auto && !cfg.repo.is_empty() {
-            let _ = sync_once(&cfg, false);
+            let _ = sync_once(&cfg, false, true);
         }
         std::thread::sleep(std::time::Duration::from_secs(cfg.interval.max(10)));
     }

@@ -50,6 +50,7 @@ enum Job {
     Profiles(Result<Vec<Profile>, String>),
     Synced(Result<Option<String>, String>),
     Applied(Result<Vec<String>, String>),
+    Pulled(Result<Vec<String>, String>),
     Created(Result<String, String>),
 }
 
@@ -93,17 +94,22 @@ pub struct S {
     flow: Flow,
     flowing: bool,
     flow_min: f32,
+    /// When the last push or pull finished well; a "Synced" note shows for a moment after it.
+    done_at: f32,
+    live_modal: bool,
+    live_warn: bool,
 }
 
-/// Where the background dashes are along their curves. A sync speeds them up; when it ends they
-/// glide to the next quarter cycle. Each curve carries `DASHES` evenly spaced dashes, so a quarter
-/// cycle on looks exactly like where they started.
+/// Where the background dashes are along their curves. A push runs them left to right (`dir` 1),
+/// a pull right to left (-1). When the work ends they glide on to the next quarter cycle. Each curve
+/// carries `DASHES` evenly spaced dashes, so any quarter cycle looks exactly like where they started.
 #[derive(Default)]
 struct Flow {
-    phase: f32,
-    speed: f32,
-    decel: Option<f32>,
-    target: f32,
+    pos: f32,
+    v: f32,
+    dir: f32,
+    /// While gliding to a stop: where it stops and how fast it slows down.
+    stop: Option<(f32, f32)>,
 }
 
 const FLOW_V: f32 = 0.3;
@@ -111,25 +117,29 @@ const DASHES: usize = 4;
 
 impl Flow {
     fn env(&self) -> f32 {
-        (self.speed / FLOW_V).clamp(0.0, 1.0)
+        (self.v.abs() / FLOW_V).clamp(0.0, 1.0)
     }
 
     fn step(&mut self, on: bool, dt: f32) {
         if on {
-            self.decel = None;
-            self.speed = (self.speed + FLOW_V / 0.8 * dt).min(FLOW_V);
-        } else if self.speed > 0.0 {
-            let decel = *self.decel.get_or_insert_with(|| {
-                let step = 1.0 / DASHES as f32;
-                self.target = ((self.phase + self.speed * 0.5) / step).ceil() * step;
-                self.speed * self.speed / (2.0 * (self.target - self.phase))
+            // Speeds up towards `dir`; a pull right after a push turns smoothly through zero.
+            self.stop = None;
+            let a = FLOW_V / 0.8 * dt;
+            self.v += (self.dir * FLOW_V - self.v).clamp(-a, a);
+        } else if self.v != 0.0 {
+            let sign = self.v.signum();
+            let (target, decel) = *self.stop.get_or_insert_with(|| {
+                let q = 1.0 / DASHES as f32;
+                let t = sign * ((sign * (self.pos + self.v * 0.5)) / q).ceil() * q;
+                (t, self.v * self.v / (2.0 * (t - self.pos).abs().max(1e-4)))
             });
-            self.speed = (self.speed - decel * dt).max(0.0);
+            self.v = sign * (self.v.abs() - decel * dt).max(0.0);
+            if self.v == 0.0 || sign * (self.pos + self.v * dt - target) >= 0.0 {
+                *self = Flow { dir: self.dir, ..Flow::default() };
+                return;
+            }
         }
-        self.phase += self.speed * dt;
-        if self.decel.is_some() && (self.speed == 0.0 || self.phase >= self.target) {
-            *self = Flow::default();
-        }
+        self.pos += self.v * dt;
     }
 }
 
@@ -184,6 +194,9 @@ fn init() -> S {
         flow: Flow::default(),
         flowing: false,
         flow_min: 0.0,
+        done_at: -10.0,
+        live_modal: false,
+        live_warn: false,
         cfg,
     }
 }
@@ -241,21 +254,46 @@ impl S {
         self.spawn(busy, move || Job::Signed(repo::user(&token).and_then(|u| repo::repos(&token).map(|r| (u, r)))));
     }
 
-    fn start_flow(&mut self) {
+    fn start_flow(&mut self, dir: f32) {
         self.flowing = true;
         self.flow_min = self.now + 1.4;
+        self.flow.dir = dir;
+        self.done_at = -10.0;
     }
 
+    /// Pushes everything picked in 01 SYNC, layouts included.
     fn sync_now(&mut self) {
-        self.start_flow();
-        let busy = self.t("Syncing…", "Senkronlanıyor…");
+        self.start_flow(1.0);
+        let busy = self.t("Pushing…", "Gönderiliyor…");
         if self.demo {
             self.busy = busy;
             self.demo_done = self.now + 2.6;
             return;
         }
         let cfg = self.cfg.clone();
-        self.spawn(busy, move || Job::Synced(app::sync_once(&cfg, true)));
+        self.spawn(busy, move || Job::Synced(app::sync_once(&cfg, true, false)));
+    }
+
+    fn pull_now(&mut self) {
+        self.start_flow(-1.0);
+        let busy = self.t("Pulling… confirm Wave's quit question if it asks", "Çekiliyor… Wave çıkışı sorarsa onayla");
+        if self.demo {
+            self.busy = busy;
+            self.demo_done = self.now + 2.6;
+            return;
+        }
+        self.spawn(busy, || Job::Pulled(app::pull()));
+    }
+
+    /// Live layouts need a yes to the warning first; everything else switches straight away.
+    fn toggle_live(&mut self, key: &str) {
+        let on = self.cfg.live_items().get(key).copied().unwrap_or(false);
+        if key == "workspaces" && !on {
+            self.live_warn = true;
+            return;
+        }
+        self.cfg.live.insert(key.into(), !on);
+        self.cfg.save();
     }
 
     fn finish_setup(&mut self) {
@@ -295,7 +333,7 @@ impl S {
         }
         self.modal = false;
         self.cfg.save();
-        self.start_flow();
+        self.start_flow(-1.0);
         let pick = self.pick.clone();
         let busy = self.t("Applying: confirm Wave's quit question…", "Uygulanıyor: Wave'in çıkış sorusunu onayla…");
         if self.demo {
@@ -306,7 +344,7 @@ impl S {
         self.spawn(busy, move || {
             let r = app::apply_profile(&pick, &save_to);
             if r.is_ok() {
-                let _ = app::sync_once(&Config::load(), true);
+                let _ = app::sync_once(&Config::load(), true, false);
             }
             Job::Applied(r)
         });
@@ -363,12 +401,27 @@ impl S {
             ),
             Job::Synced(r) => {
                 self.flowing = false;
+                if r.is_ok() {
+                    self.done_at = self.now;
+                }
                 set_err(r.map(|_| ()), self);
                 self.status = Status::load();
                 self.load_profiles();
             }
+            Job::Pulled(r) => {
+                self.flowing = false;
+                if r.is_ok() {
+                    self.done_at = self.now;
+                }
+                self.status = Status::load();
+                set_err(r.map(|_| ()), self);
+                self.scan();
+            }
             Job::Applied(r) => {
                 self.flowing = false;
+                if r.is_ok() {
+                    self.done_at = self.now;
+                }
                 self.cfg = Config::load();
                 self.folder = TextEdit::new(self.cfg.folder.clone());
                 self.status = Status::load();
@@ -417,6 +470,15 @@ fn poll(s: &mut S, now: f64, tx: &mut Tx) -> bool {
     if s.demo && s.flowing && s.demo_done > 0.0 && now > s.demo_done {
         s.flowing = false;
         s.busy.clear();
+        s.done_at = now;
+        let t = repo::now();
+        if s.flow.dir > 0.0 {
+            s.status.last_push = t;
+            s.status.feed.insert(0, (t, "settings.json · push 5e7b2a1".into()));
+        } else {
+            s.status.last_pull = t;
+            s.status.feed.insert(0, (t, format!("pulled {}", s.cfg.target)));
+        }
     }
     s.flow.step(s.flowing || now < s.flow_min, dt);
     if !s.demo && s.now - s.status_at > 2.0 {
@@ -495,7 +557,7 @@ const TEXT_ZONES: [[f32; 4]; 4] = [
     [90.0, 36.0, 440.0, 104.0],
     [84.0, 470.0, 380.0, 504.0],
     [750.0, 236.0, 1130.0, 284.0],
-    [680.0, 598.0, 920.0, 634.0],
+    [672.0, 590.0, 1114.0, 656.0],
 ];
 const SAMPLES: usize = 180;
 
@@ -608,7 +670,7 @@ fn backdrop(s: &S) -> Vec<El> {
     out.push(full(quiet).key("quiet"));
     {
         for (i, p) in paths.iter().enumerate() {
-            let head = (s.flow.phase * 1.6 + 0.35 * i as f32).rem_euclid(1.3) - 0.15;
+            let head = (s.flow.pos * 1.6 + 0.35 * i as f32).rem_euclid(1.3) - 0.15;
             out.extend(dash(&format!("swift-{i}"), p, head, 0.24, 2.5, Color { a: env, ..if i == 1 { LILAC } else { RED2 } }));
         }
     }
@@ -623,7 +685,7 @@ fn backdrop(s: &S) -> Vec<El> {
             faint = faint.stroke(l.pts[r.clone()].to_vec(), 1.0, Color { a: 0.06 + 0.06 * env, ..tint });
         }
         for j in 0..DASHES {
-            let u = (l.offset + j as f32 / DASHES as f32 + l.speed * s.flow.phase).rem_euclid(1.0);
+            let u = (l.offset + j as f32 / DASHES as f32 + l.speed * s.flow.pos).rem_euclid(1.0);
             let (a, b) = sample_range(u, l.len);
             if b <= a + 1 {
                 continue;
@@ -935,20 +997,10 @@ fn right_lobe(s: &S) -> El {
     let repo_name = s.cfg.repo.trim_start_matches("https://github.com/").to_string();
     c = c.child(row().gap(8.0).center_y()
         .child(el().size(8.0, 8.0).radius(4.0).fill(if s.status.error.is_empty() { OK } else { RED2 }))
-        .child(caps(s.t("LIVE SYNC", "CANLI SENKRON"), RED2))
+        .child(caps(s.t("REPO", "DEPO"), RED2))
         .child(mono(repo_name, 11.5, MUTED)));
     c = c.child(row().w_full().center_y().child(label(s.t("Saving to", "Kaydedilen klasör"), 13.0, 500.0, INK)).child(spacer())
         .child(mono(s.cfg.target.clone(), 12.0, INK)));
-    let auto = s.cfg.auto;
-    c = c.child(row().w_full().center_y()
-        .child(label(s.t("Auto sync", "Otomatik senkron"), 13.0, 500.0, INK))
-        .child(spacer())
-        .child(el().size(34.0, 19.0).radius(10.0).fill(if auto { RED } else { EDGE }).cursor(Cursor::Pointer)
-            .child(el().size(15.0, 15.0).radius(8.0).fill(INK).absolute(if auto { 17.0 } else { 2.0 }, 2.0))
-            .on_press(|s: &mut S| {
-                s.cfg.auto = !s.cfg.auto;
-                s.cfg.save();
-            })));
     let mut feed = col().gap(3.0).mt(4.0);
     let lines: Vec<(String, Color)> = if !s.report.is_empty() {
         s.report.iter().rev().take(6).map(|l| (l.clone(), if l.contains("FAILED") { RED2 } else { SOFT })).collect()
@@ -965,33 +1017,116 @@ fn right_lobe(s: &S) -> El {
     c
 }
 
+fn switch(on: bool) -> El {
+    el().size(34.0, 19.0).radius(10.0).fill(if on { RED } else { EDGE }).cursor(Cursor::Pointer)
+        .child(el().size(15.0, 15.0).radius(8.0).fill(INK).absolute(if on { 17.0 } else { 2.0 }, 2.0))
+}
+
+/// The live sync switch under the right card, and the button to its settings.
+fn live_row(s: &S) -> El {
+    let help = s.t("If enabled, it keeps everything synced with the remote profile: the changes you make go there directly.",
+        "Açıksa her şeyi uzaktaki profille senkron tutar: yaptığın değişiklikler doğrudan oraya gider.");
+    let live = s.cfg.live_items();
+    let n = live.values().filter(|v| **v).count();
+    let total = s.cfg.items.values().filter(|v| **v).count();
+    row().absolute(672.0, 602.0).w(442.0).center_y().gap(10.0)
+        .child(switch(s.cfg.auto).key("live").help(help.clone()).on_press(|s: &mut S| {
+            s.cfg.auto = !s.cfg.auto;
+            s.cfg.save();
+        }))
+        .child(caps(s.t("LIVE SYNC", "CANLI SENKRON"), if s.cfg.auto { RED2 } else { MUTED }).help(help))
+        .child(mono(format!("{n}/{total}"), 11.0, MUTED))
+        .child(spacer())
+        .child(button(s.t("Live settings", "Canlı ayarlar"), false).key("live-settings").on_press(|s: &mut S| {
+            s.live_modal = true;
+            s.live_warn = false;
+        }))
+}
+
+/// A card in the middle of the window over a dimmed body.
+fn sheet(card: El, on_dim: impl Fn(&mut S) + 'static) -> El {
+    let dim = Shape::new().fill_path(&body_path(), Color { r: 0.00304, g: 0.00182, b: 0.00439, a: 0.72 });
+    el().absolute(0.0, 0.0).size(W, H)
+        .child(full(dim).on_press(on_dim))
+        .child(col().absolute((W - 560.0) / 2.0, 150.0).child(card))
+}
+
+fn sheet_card() -> El {
+    col().w(560.0).fill(Color { r: 0.01229, g: 0.00750, b: 0.02217, a: 1.0 }).border(1.0, EDGE).radius(16.0).padding(22.0).gap(10.0)
+        .shadow(30.0, 80.0, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.6 })
+}
+
+fn warn_box(text: String) -> El {
+    el().w_full().padding(10.0).radius(10.0).border(1.0, RED).fill(Color { a: 0.12, ..RED })
+        .child(label(text, 13.0, 600.0, Color { r: 1.00000, g: 0.53948, b: 0.60383, a: 1.0 }).wrap().w_full())
+}
+
+fn live_modal(s: &S) -> El {
+    let mut card = sheet_card()
+        .child(label(s.t("Live sync", "Canlı senkron"), 17.0, 700.0, INK))
+        .child(label(s.t("What goes to GitHub as soon as it changes? The rest goes only when you press Push.",
+            "Neler değişir değişmez GitHub'a gitsin? Gerisi yalnızca Push'a bastığında gider."), 13.0, 500.0, SOFT).wrap().w_full());
+    let live = s.cfg.live_items();
+    let mut list = col().w_full().gap(2.0).mt(4.0);
+    for (key, _) in ITEMS {
+        if !s.cfg.items.get(key).copied().unwrap_or(true) {
+            continue;
+        }
+        let on = live.get(key).copied().unwrap_or(false);
+        let (name, _) = item_names(s, key);
+        let hint = if key == "workspaces" { s.t("Push only, recommended", "Yalnızca Push, önerilen") } else { s.t("rarely changes", "nadiren değişir") };
+        list = list.child(row().key(format!("live-{key}")).w_full().h(30.0).gap(10.0).center_y().px(6.0).radius(7.0).hover(PANEL2).cursor(Cursor::Pointer)
+            .child(check(on))
+            .child(label(name, 13.0, 500.0, INK))
+            .child(spacer())
+            .child(mono(hint, 10.5, MUTED))
+            .on_press(move |s: &mut S| s.toggle_live(key)));
+    }
+    card = card.child(list);
+    if s.live_warn {
+        card = card.child(warn_box(s.t(
+            "Workspaces, tabs and layouts change every time you move a pane or open a tab. Syncing them live sends a commit to GitHub for nearly every change, so you can hit GitHub's rate limits fast. Recommended: keep this off and send layouts with Push only when you need to.",
+            "Çalışma alanları, sekmeler ve düzenler her bölme taşıyışında, her sekme açışında değişir. Bunları canlı senkronlamak neredeyse her değişiklikte GitHub'a commit gönderir ve GitHub'ın hız limitlerini çabuk doldurabilir. Önerilen: kapalı bırak, düzenleri yalnızca gerektiğinde Push ile gönder.")))
+            .child(row().w_full().gap(10.0).child(spacer())
+                .child(button(s.t("Turn on anyway", "Yine de aç"), false).key("live-yes").on_press(|s: &mut S| {
+                    s.cfg.live.insert("workspaces".into(), true);
+                    s.cfg.save();
+                    s.live_warn = false;
+                }))
+                .child(button(s.t("Keep it off", "Kapalı kalsın"), true).key("live-no").on_press(|s: &mut S| s.live_warn = false)));
+    } else {
+        card = card.child(row().w_full().child(spacer()).child(button(s.t("Done", "Tamam"), true).key("live-done").on_press(|s: &mut S| s.live_modal = false)));
+    }
+    sheet(card, |s: &mut S| {
+        if !s.live_warn {
+            s.live_modal = false;
+        }
+    })
+}
+
 fn hx(hex: &str) -> Color {
     rune::color::hex(hex).unwrap_or(RED)
 }
 
-fn orb(s: &S) -> Vec<El> {
-    let (cx, cy) = (607.0, 372.0);
-    let env = s.flow.env();
-    let (big, small) = if !s.busy.is_empty() {
-        ("···".to_string(), String::new())
-    } else if s.cfg.setup_done {
-        ("SYNC".to_string(), ago(s, s.status.last_push))
-    } else {
-        ("START".to_string(), format!("{}/3", s.step))
-    };
+/// One metal button. `active` is the one whose work is running: it shows dots and glows with the flow.
+fn orb_button(s: &S, key: &str, (cx, cy): (f32, f32), d: f32, big: String, small: String, active: bool, dimmed: bool) -> Vec<El> {
+    let env = if active { s.flow.env() } else { 0.0 };
+    let r = d / 2.0;
     let white = |a: f32| Color { a, ..INK };
-    // A soft light band crosses the button every six seconds.
-    let p = (s.now % 6.0) / 1.6 * 1.3 - 0.15;
+    // A soft light band crosses the button every six seconds; the second one runs a little later.
+    let p = ((s.now + if key == "pull" { 0.5 } else { 0.0 }) % 6.0) / 1.6 * 1.3 - 0.15;
     let sheen_a = if (0.0..=1.0).contains(&p) { 0.26 * (std::f32::consts::PI * p).sin() } else { 0.0 };
-    let sheen = el().absolute(0.0, 0.0).size(128.0, 128.0).radius(64.0).linear_gradient(
+    let sheen = el().absolute(0.0, 0.0).size(d, d).radius(r).linear_gradient(
         2.3,
         [(0.0, white(0.0)), ((p - 0.16).clamp(0.0, 1.0), white(0.0)), (p.clamp(0.0, 1.0), white(sheen_a)), ((p + 0.16).clamp(0.0, 1.0), white(0.0)), (1.0, white(0.0))],
     );
-    let specular = el().absolute(0.0, 0.0).size(128.0, 128.0).radius(64.0)
-        .radial_gradient([0.34, 0.24], 60.0, [(0.0, white(0.4)), (0.5, white(0.08)), (1.0, white(0.0))]);
+    let specular = el().absolute(0.0, 0.0).size(d, d).radius(r)
+        .radial_gradient([0.34, 0.24], r * 0.94, [(0.0, white(0.4)), (0.5, white(0.08)), (1.0, white(0.0))]);
+    let bloom = r * 1.3;
     vec![
-        el().key("bloom").absolute(cx - 92.0, cy - 92.0).size(184.0, 184.0).radius(92.0).fill(Color { a: 0.3 + 0.35 * env, ..RED }).blur(30.0),
-        col().key("orb").absolute(cx - 64.0, cy - 64.0).size(128.0, 128.0).radius(64.0).center()
+        el().key(format!("{key}-bloom")).absolute(cx - bloom, cy - bloom).size(bloom * 2.0, bloom * 2.0).radius(bloom)
+            .fill(Color { a: 0.24 + 0.4 * env, ..RED }).blur(26.0),
+        col().key(key).absolute(cx - r, cy - r).size(d, d).radius(r).center().opacity(if dimmed { 0.55 } else { 1.0 })
             .fill(RED)
             .linear_gradient(std::f32::consts::PI, [
                 (0.0, hx("#ff5d78")),
@@ -1001,25 +1136,56 @@ fn orb(s: &S) -> Vec<El> {
                 (1.0, hx("#5a0313")),
             ])
             .border_gradient(1.5, hx("#ffb7c4"), hx("#4a0210"))
-            .shadow(12.0, 36.0, Color { a: 0.5, ..RED })
-            .cursor(Cursor::Pointer)
+            .shadow(12.0, 32.0, Color { a: 0.5, ..RED })
+            .cursor(if dimmed { Cursor::Default } else { Cursor::Pointer })
             .child(specular)
             .child(sheen)
-            .child(label(big, 17.0, 800.0, INK))
-            .child(mono(small, 9.5, INK))
-            .on_press(|s: &mut S| {
-                if !s.busy.is_empty() {
-                    return;
-                }
-                if s.cfg.setup_done {
-                    s.sync_now();
-                } else if s.step < 3 {
-                    s.step += 1;
-                } else {
-                    s.finish_setup();
-                }
-            }),
+            .child(label(if active { "···".into() } else { big }, 16.0, 800.0, INK))
+            .child(mono(if active { String::new() } else { small }, 9.5, INK)),
     ]
+}
+
+// The neck narrows towards the bottom, so the pair sits high enough that the lower glow stays inside.
+const PUSH_AT: (f32, f32) = (607.0, 268.0);
+const PULL_AT: (f32, f32) = (607.0, 416.0);
+
+fn orb(s: &S) -> Vec<El> {
+    let busy = !s.busy.is_empty();
+    if !s.cfg.setup_done {
+        let mut v = orb_button(s, "orb", (607.0, 372.0), 128.0, "START".into(), format!("{}/3", s.step), busy, false);
+        let b = v.pop().unwrap().on_press(|s: &mut S| {
+            if !s.busy.is_empty() {
+            } else if s.step < 3 {
+                s.step += 1;
+            } else {
+                s.finish_setup();
+            }
+        });
+        v.push(b);
+        return v;
+    }
+    let pulling = s.flow.dir < 0.0;
+    let mut out = Vec::new();
+    let mut push = orb_button(s, "push", PUSH_AT, 116.0, "PUSH".into(), format!("→ {}", ago(s, s.status.last_push)), busy && !pulling, busy && pulling);
+    let mut pull = orb_button(s, "pull", PULL_AT, 116.0, "PULL".into(), format!("← {}", ago(s, s.status.last_pull)), busy && pulling, busy && !pulling);
+    let b = push.pop().unwrap()
+        .help(s.t("Send this Wave to the repo now, layouts included.", "Bu Wave'i şimdi depoya gönder, düzenler dahil."))
+        .on_press(|s: &mut S| if s.busy.is_empty() { s.sync_now() });
+    push.push(b);
+    let b = pull.pop().unwrap()
+        .help(s.t("Bring the repo's version of your profile into this Wave.", "Profilinin depodaki halini bu Wave'e getir."))
+        .on_press(|s: &mut S| if s.busy.is_empty() { s.pull_now() });
+    pull.push(b);
+    out.extend(push);
+    out.extend(pull);
+    // "Synced" between the two buttons for a moment after a push or a pull.
+    let t = s.now - s.done_at;
+    let a = if (0.0..1.9).contains(&t) { (t / 0.15).min(1.0) * ((1.9 - t) / 0.45).min(1.0) } else { 0.0 };
+    out.push(row().key("synced").absolute(PUSH_AT.0 - 58.0, (PUSH_AT.1 + PULL_AT.1) / 2.0 - 11.0).w(116.0).h(22.0).center().gap(5.0).radius(11.0)
+        .fill(Color { a: 0.92 * a, r: 0.0098, g: 0.0612, b: 0.0273 }).border(1.0, Color { a, ..OK }).opacity(a)
+        .child(label("✓", 11.0, 800.0, Color { a, ..OK }))
+        .child(caps(s.t("SYNCED", "SENKRONİZE"), Color { a, ..OK })));
+    out
 }
 
 fn modal(s: &S) -> El {
@@ -1037,8 +1203,7 @@ fn modal(s: &S) -> El {
     };
     let overwrite = s.save_to != NEW && s.save_to != s.pick;
     let k = kit();
-    let mut card = col().w(560.0).fill(Color { r: 0.01229, g: 0.00750, b: 0.02217, a: 1.0 }).border(1.0, EDGE).radius(16.0).padding(22.0).gap(10.0)
-        .shadow(30.0, 80.0, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.6 })
+    let mut card = sheet_card()
         .child(label(s.t("This Wave will be set to the profile you picked", "Bu Wave seçtiğiniz profile ayarlanacaktır"), 17.0, 700.0, INK))
         .child(label(format!("{}: {}", s.t("Profile", "Profil"), s.pick), 12.5, 500.0, MUTED))
         .child(label(s.t("Where should your future changes be saved?", "İleride yapacağınız değişiklikler nereye kaydedilsin?"), 13.5, 500.0, SOFT))
@@ -1053,10 +1218,7 @@ fn modal(s: &S) -> El {
     card = card.child(row().w_full().gap(10.0).child(spacer())
         .child(button(s.t("Cancel", "Vazgeç"), false).on_press(|s: &mut S| s.modal = false))
         .child(button(s.t("Apply", "Uygula"), true).on_press(|s: &mut S| s.confirm_apply())));
-    let dim = Shape::new().fill_path(&body_path(), Color { r: 0.00304, g: 0.00182, b: 0.00439, a: 0.72 });
-    el().absolute(0.0, 0.0).size(W, H)
-        .child(full(dim).on_press(|s: &mut S| s.save_open = false))
-        .child(col().absolute(320.0, 230.0).child(card))
+    sheet(card, |s: &mut S| s.save_open = false)
 }
 
 fn overlays(s: &S) -> Vec<El> {
@@ -1146,10 +1308,16 @@ fn view(s: &S, _: &mut Cx<S>) -> El {
         .child(left_lobe(s, &k))
         .child(col().absolute(672.0, 290.0).w(442.0).child(right_lobe(s)))
         .children(orb(s));
+    if s.cfg.setup_done {
+        root = root.child(live_row(s));
+    }
     let status = if !s.busy.is_empty() { (s.busy.clone(), SOFT) } else if !s.err.is_empty() { (s.err.clone(), RED2) } else { (String::new(), SOFT) };
-    root = root.child(label(status.0, 12.0, 600.0, status.1).absolute(690.0, 612.0));
+    root = root.child(label(status.0, 12.0, 600.0, status.1).absolute(690.0, if s.cfg.setup_done { 640.0 } else { 612.0 }));
     if s.modal {
         root = root.child(modal(s));
+    }
+    if s.live_modal {
+        root = root.child(live_modal(s));
     }
     rune_kit::root(root.children(overlays(s)), Vec::<El>::new())
 }
@@ -1177,7 +1345,7 @@ fn demo(s: &mut S) {
     s.profiles = ["studio-mac-7f3a", "work-imac-2c91", "ubuntu-lab-04be"].iter().map(|n| Profile { name: n.to_string(), host: n.rsplit_once('-').unwrap().0.into(), os: if n.starts_with("ubuntu") { "linux".into() } else { "macos".into() }, updated: 0 }).collect();
     s.pick = "work-imac-2c91".into();
     let now = repo::now();
-    s.status = Status { last_check: now, last_push: now - 12, last_hash: 0, error: String::new(), feed: vec![
+    s.status = Status { last_check: now, last_push: now - 12, last_pull: now - 1500, last_hash: 0, error: String::new(), feed: vec![
         (now - 12, "widgets.json · push 1f3a9c2".into()),
         (now - 1040, "workspaces.json · push 77b01de".into()),
         (now - 2800, "settings.json · push 0c55e18".into()),
@@ -1212,8 +1380,12 @@ pub fn run(demo_mode: bool) {
             ("profile", |s| { demo(s); s.cfg.setup_done = true; s.step = 3; }),
             ("tour", |s| { demo(s); s.cfg.setup_done = false; s.step = 1; s.ext_open = false; }),
             ("apply", |s| { demo(s); s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
-            ("live", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; }),
-            ("flow", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.flowing = true; s.flow.speed = FLOW_V; s.flow.phase = 0.37; s.busy = "Syncing…".into(); }),
+            ("main", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; }),
+            ("flow", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.flowing = true; s.flow.dir = 1.0; s.flow.v = FLOW_V; s.flow.pos = 0.37; s.busy = "Pushing…".into(); }),
+            ("pull", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.flowing = true; s.flow.dir = -1.0; s.flow.v = -FLOW_V; s.flow.pos = -0.37; s.busy = "Pulling… confirm Wave's quit question if it asks".into(); }),
+            ("synced", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.done_at = 0.2; }),
+            ("live", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.live_modal = true; }),
+            ("livewarn", |s| { demo(s); s.cfg.setup_done = true; s.step = 1; s.live_modal = true; s.live_warn = true; }),
             ("tr", |s| { demo(s); s.tr = true; s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
         ],
         ..AppSpec::new("WavySync", (W, H), if demo_mode { init_demo } else { init }, view)

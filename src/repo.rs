@@ -117,8 +117,9 @@ impl Repo {
         out
     }
 
-    /// Replaces `folder` with `files` and pushes. Returns the new commit, or None when nothing changed.
-    pub fn save(&self, folder: &str, mut files: Files, meta: Value) -> Result<Option<String>, String> {
+    /// Replaces `folder` with `files` and pushes; files already there for which `keep` says yes stay
+    /// as they are. Returns the new commit, or None when nothing changed.
+    pub fn save(&self, folder: &str, mut files: Files, meta: Value, keep: impl Fn(&str) -> bool) -> Result<Option<String>, String> {
         if folder.is_empty() || folder.contains(['/', '\\']) || folder.starts_with('.') {
             return Err(format!("bad folder name: {folder:?}"));
         }
@@ -126,6 +127,15 @@ impl Repo {
             self.refresh()?;
             let dir = self.dir.join(folder);
             let old_meta = fs::read(dir.join(META)).ok();
+            let mut old = Vec::new();
+            crate::wave::walk(&dir, &dir, &mut old);
+            for rel in old.iter().map(|p| crate::wave::rel_str(p)) {
+                if rel != META && keep(&rel) && !files.contains_key(&rel) {
+                    if let Ok(b) = fs::read(dir.join(&rel)) {
+                        files.insert(rel, b);
+                    }
+                }
+            }
             let _ = fs::remove_dir_all(&dir);
             if let Some(old) = &old_meta {
                 files.insert(META.into(), old.clone());
@@ -293,6 +303,32 @@ mod tests {
         assert_eq!(b64(b"fo"), "Zm8=");
         assert_eq!(b64(b"foo"), "Zm9v");
         assert_eq!(b64(b"foobar"), "Zm9vYmFy");
+    }
+
+    /// A live push carries only some items; the files of the others must stay as the last Push left them.
+    #[test]
+    fn kept_files_survive_a_partial_save() {
+        let root = std::env::temp_dir().join(format!("wavysync-keep-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        let bare = root.join("remote.git");
+        fs::create_dir_all(&bare).unwrap();
+        git(&bare, &["init", "--quiet", "--bare", "-b", "main"], None).unwrap();
+        let r = Repo { dir: root.join("work"), url: bare.to_string_lossy().into(), token: None };
+        let files = |pairs: &[(&str, &str)]| pairs.iter().map(|(k, v)| (k.to_string(), v.as_bytes().to_vec())).collect::<Files>();
+        let meta = serde_json::json!({ "host": "test" });
+
+        r.save("pc", files(&[("config/settings.json", "1"), ("workspaces.json", "layout")]), meta.clone(), |_| false).unwrap();
+        let live = |rel: &str| crate::wave::folder_category(rel) == "workspaces";
+        assert!(r.save("pc", files(&[("config/settings.json", "2")]), meta.clone(), live).unwrap().is_some());
+        r.refresh().unwrap();
+        assert_eq!(fs::read_to_string(r.dir.join("pc/workspaces.json")).unwrap(), "layout");
+        assert_eq!(fs::read_to_string(r.dir.join("pc/config/settings.json")).unwrap(), "2");
+
+        // A full push (nothing kept) still drops what is no longer picked.
+        r.save("pc", files(&[("config/settings.json", "2")]), meta, |_| false).unwrap();
+        r.refresh().unwrap();
+        assert!(!r.dir.join("pc/workspaces.json").exists());
+        let _ = fs::remove_dir_all(&root);
     }
 
     #[test]

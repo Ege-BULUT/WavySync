@@ -62,6 +62,16 @@ pub fn paths() -> WavePaths {
     WavePaths { config, data }
 }
 
+/// Which sync item a file in a profile folder belongs to.
+pub fn folder_category(rel: &str) -> &'static str {
+    match rel {
+        "workspaces.json" => "workspaces",
+        "extensions.json" => "widgets",
+        _ if rel.starts_with("files/") => "widgets",
+        _ => category(rel.trim_start_matches("config/")),
+    }
+}
+
 /// Which sync item a config file belongs to.
 pub fn category(rel: &str) -> &'static str {
     let name = rel.rsplit('/').next().unwrap_or(rel);
@@ -103,7 +113,7 @@ fn pretty(v: &Value) -> Vec<u8> {
     tokenize(&s).into_bytes()
 }
 
-fn walk(dir: &Path, base: &Path, out: &mut Vec<PathBuf>) {
+pub fn walk(dir: &Path, base: &Path, out: &mut Vec<PathBuf>) {
     let Ok(rd) = fs::read_dir(dir) else { return };
     for e in rd.flatten() {
         let p = e.path();
@@ -119,7 +129,7 @@ fn walk(dir: &Path, base: &Path, out: &mut Vec<PathBuf>) {
     }
 }
 
-fn rel_str(p: &Path) -> String {
+pub fn rel_str(p: &Path) -> String {
     p.to_string_lossy().replace('\\', "/")
 }
 

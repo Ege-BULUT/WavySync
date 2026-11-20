@@ -1,4 +1,5 @@
 {"events": [
-  {"t": 1.0, "type": "tap", "key": "orb", "hold": 0.08},
-  {"t": 8.0, "type": "mark", "name": "end"}
+  {"t": 1.0, "type": "tap", "key": "push", "hold": 0.08},
+  {"t": 7.5, "type": "tap", "key": "pull", "hold": 0.08},
+  {"t": 14.0, "type": "mark", "name": "end"}
 ]}

@@ -12,7 +12,8 @@ const HELP: &str = "WavySync: sync Wave Terminal to a GitHub repo, one folder pe
   wavysync --open          open the window detached (what the Wave widget runs)
   wavysync --demo          the window on made-up data; touches nothing
   wavysync --daemon        the background loop that pushes changes
-  wavysync --sync          push now
+  wavysync --sync          push now (everything picked, layouts too)
+  wavysync --pull          bring this computer's folder from the repo into Wave
   wavysync --profiles      list the profiles in the repo
   wavysync --apply NAME [--save-to FOLDER]
                            set this Wave to profile NAME
@@ -38,7 +39,8 @@ fn main() {
         "--open" => app::spawn_detached(&[]),
         "--daemon" => app::daemon(),
         "--demo" => ui::run(true),
-        "--sync" => ok_or_exit(app::sync_once(&app::Config::load(), true).map(|c| match c {
+        "--pull" => ok_or_exit(app::pull().map(|r| r.iter().for_each(|l| println!("{l}")))),
+        "--sync" => ok_or_exit(app::sync_once(&app::Config::load(), true, false).map(|c| match c {
             Some(c) => println!("pushed {c}"),
             None => println!("nothing changed"),
         })),

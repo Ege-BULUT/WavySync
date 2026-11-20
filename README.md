@@ -45,7 +45,9 @@ own folder, and any computer can take on another's setup, including the tools it
   Every folder shows up as a profile you can apply anywhere.
 - **You choose where changes go.** Applying a profile asks where this computer's future changes
   should be saved: its own folder, the profile you just applied, or a new one.
-- **Live.** A small background process pushes changes as you make them. Turn it off with one switch.
+- **Push, Pull, Live.** Push sends this Wave to the repo, layouts included; Pull brings the repo's
+  version back. Live sync pushes settings, widgets, themes and connections by itself as they change.
+  Layouts change with every pane and tab, so they wait for Push unless you turn them on in Live settings.
 - **Private by default.** Sign in with GitHub to use a private repo. Keys, tokens and passwords are
   stripped before anything leaves your computer, and your home folder is stored as `{HOME}` so paths
   work for a different user name.
@@ -112,9 +114,10 @@ your-wave-profiles/                 a GitHub repo you own
 
 1. **Setup.** Pick what to sync, pick a repo, name this computer's folder. WavySync adds itself to
    Wave's sidebar and to your login items.
-2. **Sync.** While Wave runs, the background process reads Wave's config files and its workspace
-   database (read only), removes secrets and local noise, and pushes a commit when something
-   changed.
+2. **Sync.** Push reads Wave's config files and its workspace database (read only), removes secrets
+   and local noise, and commits what changed. With live sync on, a background process does the same
+   every 30 seconds for the live items, and leaves the rest of the folder as the last Push left it.
+   Pull writes the folder back into Wave; it closes Wave only when the layouts differ.
 3. **Apply.** Pick a profile. WavySync backs up the current Wave to `~/.config/wavysync/backups`,
    asks Wave to quit (confirm Wave's question if it shows one), writes the profile, installs what the widgets need,
    starts Wave again, and from then on pushes to the folder you chose.
@@ -129,7 +132,8 @@ The window covers everything, and the same actions work without it:
 
 ```
 wavysync                 open the window
-wavysync --sync          push now
+wavysync --sync          push now, everything picked
+wavysync --pull          bring this computer's folder from the repo into Wave
 wavysync --profiles      list the profiles in the repo
 wavysync --apply NAME [--save-to FOLDER]
                          set this Wave to profile NAME
