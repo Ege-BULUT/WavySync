@@ -24,6 +24,8 @@ PAGES = {
     "docs/": ("Belgeler: WavySync ile Wave Terminal nasıl senkronlanır",
               "WavySync'i kur, Wave Terminal düzenini Push ve Pull ile taşı, canlı senkronu kullan, profil uygula, depo yapısını ve komut satırını öğren."),
     "changelog/": ("Değişiklikler · WavySync", "Her WavySync sürümü ve neyin değiştiği, en yenisi üstte."),
+    "macy/": ("MacySync, WavySync'in ikizi: bir Mac'i yeni bir Mac'e taşı",
+              "MacySync bir Mac'i diğerine taşır: ayarlarıyla uygulamalar, anahtarlar ve klasörler, doğrudan Mac'ten Mac'e, uçtan uca şifreli; kurulumu bir yapay zekâ ajanı bitirir. WavySync'in ikizi."),
 }
 
 

@@ -45,6 +45,11 @@ const TR = {
   "dp.p": "Her sistem için tek dosya. Çalıştır, üç adımlı kurulum açılsın.", "dp.ver": "Son sürüm:", "dp.all": "Tüm sürümler",
   "docs.k": "Belgeler", "docs.h": "<em>Wavy~Sync</em> nasıl kullanılır", "docs.p": "İlk açılıştan komut satırına kadar her şey.",
   "cl.k": "Değişiklikler", "cl.h": "Neler <em>yeni</em>", "cl.p": "Her sürüm, en yenisi üstte. İndirmeler GitHub Releases'ta.", "cl.first": "İlk sürüm",
+  "tm.k": "İkiz", "tm.h": "<em>Macy~Sync</em> ile tanış", "tm.p": "Aynı yapımcı, aynı görünüm, başka bir iş: bir Mac'i yeni bir Mac'e taşır.",
+  "tm.l": "Yeni Mac'in, zaten senin.", "tm.1": "Uygulamaları ayarları, anahtarları, dotfile'ları ve klasörleriyle taşır",
+  "tm.2": "Her Mac gönderir ya da alır, oturum başına seçilir", "tm.3": "Dosyalar doğrudan Mac'ten Mac'e, uçtan uca şifreli gider",
+  "tm.4": "Bir ağaçtan seç: kategoriler, uygulamalar, her uygulamanın parçaları", "tm.5": "Kurulumu seçtiğin bir yapay zekâ ajanı bitirir",
+  "tm.go": "macysync.vercel.app'i aç",
   "foot": "Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir."
 };
 const EN = {};
@@ -95,3 +100,15 @@ function latest(repo, relSel, dateSel) {
 }
 latest("wavetermdev/waveterm", "[data-wave-rel]", "[data-wave-date]");
 latest("Ege-BULUT/WavySync", "[data-ws-rel]");
+
+// The twin card leans toward the pointer and its glow follows it.
+document.querySelectorAll(".twin").forEach(c => {
+  c.addEventListener("pointermove", e => {
+    const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    c.style.setProperty("--ry", ((x - .5) * 16).toFixed(2) + "deg");
+    c.style.setProperty("--rx", ((.5 - y) * 12).toFixed(2) + "deg");
+    c.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
+    c.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+  });
+  c.addEventListener("pointerleave", () => { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); });
+});
