@@ -217,7 +217,9 @@ pub struct RepoInfo {
 
 pub fn repos(token: &str) -> Result<Vec<RepoInfo>, String> {
     let mut out = Vec::new();
-    for page in 1..=3 {
+    // Every page: the picker searches the whole account, so it needs every repo.
+    // ponytail: a 50-page guard (5,000 repos) stops a runaway loop; raise it if anyone owns more.
+    for page in 1..=50 {
         let v = api("GET", &format!("/user/repos?per_page=100&sort=updated&page={page}"), token, None)?;
         let arr = v.as_array().cloned().unwrap_or_default();
         out.extend(arr.iter().map(|r| RepoInfo {

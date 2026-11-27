@@ -66,6 +66,9 @@ pub struct S {
     login: String,
     repos: Vec<RepoInfo>,
     repo_open: bool,
+    repo_q: TextEdit,
+    repo_show: usize,
+    repo_dd_bottom: f32,
     guest_url: TextEdit,
     new_repo: TextEdit,
     creating: bool,
@@ -169,8 +172,11 @@ fn init() -> S {
         login: cfg.login.clone(),
         repos: Vec::new(),
         repo_open: false,
+        repo_q: TextEdit::new(""),
+        repo_show: REPO_PAGE,
+        repo_dd_bottom: 0.0,
         guest_url: TextEdit::new(if cfg.guest { cfg.repo.clone() } else { String::new() }),
-        new_repo: TextEdit::new("wave-profiles"),
+        new_repo: TextEdit::new(DEFAULT_REPO),
         creating: false,
         create_private: true,
         device: None,
@@ -372,6 +378,14 @@ impl S {
                     self.cfg.guest = false;
                     self.repos = repos;
                     self.cfg.save();
+                    // No repo picked yet and the one WavySync would create already exists: pick it.
+                    if self.cfg.repo.is_empty() {
+                        if let Some(name) = default_repo(&self.repos, &self.login) {
+                            self.cfg.repo = name;
+                            self.cfg.save();
+                            self.load_profiles();
+                        }
+                    }
                 }),
                 self,
             ),
@@ -745,6 +759,48 @@ fn trigger(key: &str, s: impl Into<String>) -> El {
         .child(label("▾", 12.0, 600.0, MUTED))
 }
 
+/// The repo WavySync offers to create, and picks by default when the account already has it.
+const DEFAULT_REPO: &str = "wave-profiles";
+/// Rows the repo picker adds each time its last row scrolls into view.
+const REPO_PAGE: usize = 40;
+
+/// Repos whose full name contains every word of `q`, ignoring case.
+fn filter_repos<'a>(repos: &'a [RepoInfo], q: &str) -> Vec<&'a RepoInfo> {
+    let words: Vec<String> = q.split_whitespace().map(str::to_lowercase).collect();
+    repos.iter().filter(|r| {
+        let name = r.full_name.to_lowercase();
+        words.iter().all(|w| name.contains(w.as_str()))
+    }).collect()
+}
+
+/// The account's `wave-profiles` repo, if it has one: the user's own first, then any other owner's.
+fn default_repo(repos: &[RepoInfo], login: &str) -> Option<String> {
+    let named = |r: &&RepoInfo| r.full_name.rsplit('/').next().is_some_and(|n| n.eq_ignore_ascii_case(DEFAULT_REPO));
+    let own = format!("{}/", login.to_lowercase());
+    repos.iter().filter(named).find(|r| r.full_name.to_lowercase().starts_with(&own))
+        .or_else(|| repos.iter().find(named))
+        .map(|r| r.full_name.clone())
+}
+
+#[cfg(test)]
+mod repo_pick_tests {
+    use super::*;
+    fn r(n: &str) -> RepoInfo {
+        RepoInfo { full_name: n.into(), private: false }
+    }
+    #[test]
+    fn search_and_default() {
+        let all = vec![r("someone/wave-profiles"), r("me/MacySync"), r("me/Wave-Profiles"), r("me/total-regime")];
+        assert_eq!(filter_repos(&all, "").len(), 4);
+        assert_eq!(filter_repos(&all, "WAVE").len(), 2);
+        assert_eq!(filter_repos(&all, "me sync").len(), 1);
+        assert!(filter_repos(&all, "nope").is_empty());
+        assert_eq!(default_repo(&all, "Me").as_deref(), Some("me/Wave-Profiles"));
+        assert_eq!(default_repo(&all[..2], "me").as_deref(), Some("someone/wave-profiles"));
+        assert_eq!(default_repo(&all[1..2], "me"), None);
+    }
+}
+
 fn menu(key: &str, items: Vec<(String, bool, El)>) -> El {
     let mut m = col().fill(Color { r: 0.01096, g: 0.00700, b: 0.01938, a: 1.0 }).border(1.0, EDGE).radius(10.0).padding(4.0).w(420.0).shadow(18.0, 40.0, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.5 });
     for (_, add, e) in items {
@@ -863,7 +919,10 @@ fn step_repo(s: &S, k: &Kit) -> El {
                 s.repos.clear();
                 s.cfg.save();
             })));
-        c = c.child(trigger("repo-dd", current).on_press(|s: &mut S| s.repo_open = !s.repo_open));
+        c = c.child(trigger("repo-dd", current).on_press(|s: &mut S| {
+            s.repo_open = !s.repo_open;
+            s.repo_show = REPO_PAGE;
+        }));
         if s.creating {
             c = c.child(row().gap(8.0).center_y()
                 .child(TextInput::new(&s.new_repo).width(Some(200.0)).on_edit(|s: &mut S| &mut s.new_repo).build(k))
@@ -1236,18 +1295,40 @@ fn overlays(s: &S) -> Vec<El> {
             s.creating = true;
             s.repo_open = false;
         }))];
-        for r in s.repos.iter().take(12) {
+        let k = kit();
+        items.push((String::new(), false, row().w_full().px(4.0).py(4.0)
+            .child(TextInput::new(&s.repo_q).placeholder(s.t("Search repos", "Depo ara")).width(Some(404.0))
+                .on_edit(|s: &mut S| &mut s.repo_q).on_change(|s: &mut S, _| s.repo_show = REPO_PAGE).build(&k))));
+        let hits = filter_repos(&s.repos, &s.repo_q.text);
+        let mut list = col().w_full();
+        for r in hits.iter().take(s.repo_show) {
             let name = r.full_name.clone();
             let mark = if r.private { "◆" } else { "◇" };
-            items.push((name.clone(), false, menu_row(format!("{mark} {name}"), false).on_press(move |s: &mut S| {
+            list = list.child(menu_row(format!("{mark} {name}"), false).on_press(move |s: &mut S| {
                 s.cfg.repo = name.clone();
                 s.cfg.guest = false;
                 s.repo_open = false;
                 s.creating = false;
                 s.cfg.save();
                 s.load_profiles();
-            })));
+            }));
         }
+        if hits.is_empty() {
+            list = list.child(row().px(9.0).py(6.0).child(label(s.t("No repo matches.", "Eşleşen depo yok."), 12.0, 500.0, MUTED)));
+        } else if hits.len() > s.repo_show {
+            // Scrolling this row into view shows the next page of rows.
+            let more = hits.len() - s.repo_show;
+            list = list.child(row().px(9.0).py(6.0)
+                .child(label(format!("{more} {}", s.t("more…", "tane daha…")), 12.0, 500.0, MUTED))
+                .on_layout(|s: &mut S, r: [f32; 4]| {
+                    if r[1] < s.repo_dd_bottom {
+                        s.repo_show += REPO_PAGE;
+                    }
+                }));
+        }
+        let list = list.scroll(ScrollSpec { stick_bottom: false }).max_h(320.0)
+            .on_layout(|s: &mut S, r: [f32; 4]| s.repo_dd_bottom = r[1] + r[3]);
+        items.push((String::new(), false, list));
         out.push(menu("repo-dd", items));
     }
     if s.pick_open {
@@ -1323,6 +1404,14 @@ fn view(s: &S, _: &mut Cx<S>) -> El {
 }
 
 // Demo states for README screenshots: made-up names, nothing from this computer.
+/// The repo scene shows an account with many repos, so the picker's search and scrolling show.
+fn demo_many_repos(s: &mut S) {
+    let names = ["api-gateway", "blog", "cli-tools", "dotfiles-old", "game-jam", "homelab", "infra", "notes", "photo-sort", "recipes", "site", "talks"];
+    for (i, n) in names.iter().cycle().take(90).enumerate() {
+        s.repos.push(RepoInfo { full_name: format!("someone/{n}-{}", i / names.len() + 1), private: i % 3 == 0 });
+    }
+}
+
 fn demo(s: &mut S) {
     use crate::ext::Dep;
     s.demo = true;
@@ -1376,7 +1465,7 @@ pub fn run(demo_mode: bool) {
         families: ("Inter", "ui-monospace"),
         scenes: &[
             ("sync", |s| { demo(s); s.cfg.setup_done = false; s.step = 1; }),
-            ("repo", |s| { demo(s); s.cfg.setup_done = false; s.step = 2; s.repo_open = true; }),
+            ("repo", |s| { demo(s); s.cfg.setup_done = false; s.step = 2; s.repo_open = true; demo_many_repos(s); }),
             ("profile", |s| { demo(s); s.cfg.setup_done = true; s.step = 3; }),
             ("tour", |s| { demo(s); s.cfg.setup_done = false; s.step = 1; s.ext_open = false; }),
             ("apply", |s| { demo(s); s.cfg.setup_done = true; s.step = 3; s.open_apply(); }),
