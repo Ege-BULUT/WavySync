@@ -1,6 +1,6 @@
 [package]
 name = "wavysync"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 description = "Sync everything in Wave Terminal to a GitHub repo, one folder per computer."
