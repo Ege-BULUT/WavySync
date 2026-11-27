@@ -288,3 +288,19 @@ ul.keyf li { margin: 0 0 8px; break-inside: avoid; }
 .twin:hover .tgo { gap: 16px; }
 @media (max-width: 860px) { .twin { grid-template-columns: 1fr; padding: 20px; } .twin img { transform: translateZ(40px); } }
 @media (prefers-reduced-motion: reduce) { .twin { animation: none; transform: none; } }
+
+/* family: one card per *ySync app, each in its own colours with its own line */
+.fam { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 14px; }
+.fm { position: relative; display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 18px 18px 64px; border-radius: 20px; text-decoration: none; color: #eef2f7; background: linear-gradient(160deg, color-mix(in srgb, var(--fa) 16%, var(--fbg)), var(--fbg) 62%); border: 1px solid var(--fe); overflow: hidden; transition: transform .25s, border-color .25s, box-shadow .25s; }
+.fm:hover { transform: translateY(-4px); border-color: var(--fa); box-shadow: 0 18px 40px -20px var(--fa); }
+.fm.here { border-color: var(--fa); box-shadow: inset 0 0 0 1px var(--fa); }
+.fm svg { position: absolute; left: 0; bottom: 8px; width: 100%; height: 46px; overflow: visible; }
+.fm .fb { fill: none; stroke: var(--fe); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.fm .fr { fill: none; stroke: var(--fa); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 50 700; animation: famflow 3.4s linear infinite; }
+@keyframes famflow { from { stroke-dashoffset: 750; } to { stroke-dashoffset: 0; } }
+.fm .fk { font: 700 11px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .16em; color: var(--fa); }
+.fm b { font: 800 21px/1.15 Inter, ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: -.02em; }
+.fm b i { font-style: normal; color: var(--fa); }
+.fm .fl { color: #b9c1cc; font-size: 14px; line-height: 1.4; }
+.fm .fh { position: absolute; top: 15px; right: 14px; font: 700 10px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--fbg); background: var(--fa); padding: 3px 7px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .fm .fr { animation: none; } }

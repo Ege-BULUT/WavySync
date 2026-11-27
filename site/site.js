@@ -50,7 +50,16 @@ const TR = {
   "tm.2": "Her Mac gönderir ya da alır, oturum başına seçilir", "tm.3": "Dosyalar doğrudan Mac'ten Mac'e, uçtan uca şifreli gider",
   "tm.4": "Bir ağaçtan seç: kategoriler, uygulamalar, her uygulamanın parçaları", "tm.5": "Kurulumu seçtiğin bir yapay zekâ ajanı bitirir",
   "tm.go": "macysync.vercel.app'i aç",
-  "foot": "Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir."
+  "foot": "Wave Terminal ayrı bir projedir, WavySync ile bağlantılı değildir.",
+  "fam.k": "Aile",
+  "fam.h": "Tek aile, <em>her türlü taşıma</em>",
+  "fam.p": "Aynı yapımcı, aynı görünüm. Aynı sistemden aynı sisteme taşıyanlar en derine iner, çünkü iki uç da aynı yolları ve ayarları paylaşır; AnySync sistemler arasında geçer; WavySync de Wave Terminal'i her yerde aynı tutar.",
+  "fam.here": "buradasın",
+  "fam.macysync": "Mac'ten Mac'e",
+  "fam.windysync": "Windows'tan Windows'a",
+  "fam.linysync": "Linux'tan Linux'a, her dağıtım",
+  "fam.anysync": "macOS, Windows ve Linux arasında",
+  "fam.wavysync": "Wave Terminal, her bilgisayarda aynı"
 };
 const EN = {};
 document.querySelectorAll("[data-i]").forEach(el => { EN[el.dataset.i] = el.innerHTML; });
